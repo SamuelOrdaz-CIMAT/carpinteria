@@ -83,6 +83,33 @@ Tu app quedara en una URL parecida a:
 https://tuusuario.pythonanywhere.com
 ```
 
+## Actualizar con GitHub
+
+Repositorio:
+
+```text
+https://github.com/SamuelOrdaz-CIMAT/carpinteria
+```
+
+En tu computadora:
+
+```powershell
+git add .
+git commit -m "Describe el cambio"
+git push
+```
+
+En PythonAnywhere:
+
+```bash
+cd ~/Carpinteria
+git pull
+```
+
+Luego entra a la pestana `Web` y presiona `Reload`.
+
+No subas `carpinteria.db` al repo. Esa base se queda viva en PythonAnywhere.
+
 La primera vez importa los materiales y precios desde `Precios_Julio_2026.xlsx` y crea la base `carpinteria.db`.
 
 ## Flujo de uso
