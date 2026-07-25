@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Presupuestos</h1>
+<form class="toolbar budget-form" method="post">
+  <label>Nombre del trabajo
+    <input name="title" placeholder="Ej. Cocina casa Lopez">
+    <span class="field-help">Titulo interno y del presupuesto.</span>
+  </label>
+  <label>Cliente
+    <input name="customer" placeholder="Ej. Familia Lopez">
+    <span class="field-help">Persona, obra o negocio.</span>
+  </label>
+  <label>Tipo de mueble
+    <select name="furniture_type_id" required>
+      {% for item in furniture %}<option value="{{ item.id }}">{{ item.name }}</option>{% endfor %}
+    </select>
+    <span class="field-help">Usa la lista de materiales guardada en ese tipo.</span>
+  </label>
+  <label>Cantidad
+    <input name="furniture_qty" type="number" step="0.01" min="0" value="1" placeholder="Ej. 1">
+    <span class="field-help">Numero de piezas iguales a cotizar.</span>
+  </label>
+  <label>Mano de obra
+    <input name="labor_cost" type="number" step="0.01" min="0" placeholder="Ej. 2500">
+    <span class="field-help">Si lo dejas vacio usa la mano de obra base.</span>
+  </label>
+  <label>Margen %
+    <input name="margin_pct" type="number" step="0.01" min="0" value="30" placeholder="Ej. 30">
+    <span class="field-help">Ganancia que se suma solo al material.</span>
+  </label>
+  <label>Notas
+    <input name="notes" placeholder="Ej. Incluye flete e instalacion">
+    <span class="field-help">Condiciones importantes del trabajo.</span>
+  </label>
+  <button class="button primary">Crear</button>
+</form>
+<div class="panel">
+  <table>
+    <thead><tr><th>Folio</th><th>Trabajo</th><th>Cliente</th><th>Mueble</th><th>Fecha</th><th></th><th></th><th></th></tr></thead>
+    <tbody>
+      {% for budget in budgets %}
+      <tr>
+        <td>#{{ budget.id }}</td>
+        <td>{{ budget.title }}</td>
+        <td>{{ budget.customer or "-" }}</td>
+        <td>{{ budget.furniture_name or "-" }}</td>
+        <td>{{ budget.created_at }}</td>
+        <td><a class="button" href="{{ url_for('budget_detail', budget_id=budget.id) }}">Modificar</a></td>
+        <td><a class="button" href="{{ url_for('budget_quote_pdf', budget_id=budget.id) }}">PDF</a></td>
+        <td>
+          <form method="post" action="{{ url_for('delete_budget', budget_id=budget.id) }}" onsubmit="return confirm('Eliminar este presupuesto? Esta accion no se puede deshacer.');">
+            <button class="button danger">Eliminar</button>
+          </form>
+        </td>
+      </tr>
+      {% else %}
+      <tr><td colspan="8">No hay presupuestos todavia.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="hero small">
+  <div>
+    <p class="eyebrow">Presupuesto #{{ budget.id }}</p>
+    <h1>{{ budget.title }}</h1>
+    <p class="muted">{{ budget.customer or "Sin cliente" }} - {{ budget.created_at }}</p>
+  </div>
+  <div class="hero-actions">
+    <a class="button primary" href="{{ url_for('budget_quote_pdf', budget_id=budget.id) }}">Descargar cotizacion PDF</a>
+    <a class="button" href="{{ whatsapp_url }}" target="_blank" rel="noopener">Mensaje WhatsApp</a>
+    <button class="button" onclick="window.print()">Imprimir</button>
+    <form method="post" action="{{ url_for('delete_budget', budget_id=budget.id) }}" onsubmit="return confirm('Eliminar este presupuesto? Esta accion no se puede deshacer.');">
+      <button class="button danger">Eliminar</button>
+    </form>
+  </div>
+</section>
+
+<form class="panel budget-edit-form" method="post" action="{{ url_for('update_budget', budget_id=budget.id) }}">
+  <h2>Modificar presupuesto</h2>
+  <label>Nombre del trabajo
+    <input name="title" value="{{ budget.title }}" required>
+  </label>
+  <label>Cliente
+    <input name="customer" value="{{ budget.customer }}">
+  </label>
+  <label>Tipo de mueble
+    <select name="furniture_type_id" required>
+      {% for item in furniture %}
+        <option value="{{ item.id }}" {% if item.id == budget.furniture_type_id %}selected{% endif %}>{{ item.name }}</option>
+      {% endfor %}
+    </select>
+    <span class="field-help">Al cambiar el tipo se recalculan los materiales del presupuesto.</span>
+  </label>
+  <label>Cantidad
+    <input name="furniture_qty" type="number" step="0.01" min="0" value="{{ budget.furniture_qty }}">
+  </label>
+  <label>Mano de obra
+    <input name="labor_cost" type="number" step="0.01" min="0" value="{{ budget.labor_cost }}">
+  </label>
+  <label>Margen %
+    <input name="margin_pct" type="number" step="0.01" min="0" value="{{ budget.margin_pct }}">
+  </label>
+  <label>Notas
+    <input name="notes" value="{{ budget.notes }}">
+  </label>
+  <button class="button primary">Guardar cambios y recalcular</button>
+</form>
+
+<div class="panel">
+  <table>
+    <thead><tr><th>Material</th><th>Proveedor</th><th>Cantidad</th><th>Unidad</th><th>Precio</th><th>Total</th></tr></thead>
+    <tbody>
+      {% for line in lines %}
+      <tr>
+        <td>{{ line.material_name }}</td>
+        <td>{{ line.supplier_name or "-" }}</td>
+        <td>{{ "%.3f"|format(line.quantity) }}</td>
+        <td>{{ line.unit }}</td>
+        <td>{{ line.unit_price|money }}</td>
+        <td>{{ line.total|money }}</td>
+      </tr>
+      {% else %}
+      <tr><td colspan="6">El tipo de mueble no tenia materiales capturados al crear este presupuesto.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<section class="totals">
+  <div><span>Materiales</span><strong>{{ material_total|money }}</strong></div>
+  <div><span>Mano de obra</span><strong>{{ budget.labor_cost|money }}</strong></div>
+  <div><span>Subtotal antes de margen</span><strong>{{ subtotal|money }}</strong></div>
+  <div><span>Margen material {{ budget.margin_pct }}%</span><strong>{{ margin_amount|money }}</strong></div>
+  <div class="grand"><span>Total sugerido</span><strong>{{ grand_total|money }}</strong></div>
+</section>
+{% endblock %}

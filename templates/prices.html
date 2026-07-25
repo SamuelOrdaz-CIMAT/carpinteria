@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Precios</h1>
+<form method="post" class="panel wide">
+  <p class="section-note">Captura el precio de cada material con cada proveedor. Deja vacia la celda si no tienes precio de ese proveedor.</p>
+  <div class="table-scroll">
+    <table>
+      <thead>
+        <tr>
+          <th>Material</th>
+          {% for supplier in suppliers %}<th>{{ supplier.name }}</th>{% endfor %}
+          <th>Mas barato</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for material in materials %}
+        {% set prices = [] %}
+        <tr>
+          <th>{{ material.name }}</th>
+          {% for supplier in suppliers %}
+            {% set value = price_map.get((material.id, supplier.id)) %}
+            {% if value is not none %}{% set _ = prices.append(value) %}{% endif %}
+            <td>
+              <input
+                class="price-input"
+                type="number"
+                step="0.01"
+                min="0"
+                name="price_{{ material.id }}_{{ supplier.id }}"
+                value="{{ value or '' }}"
+                placeholder="0.00"
+                title="Precio de {{ material.name }} con {{ supplier.name }}. Dejar vacio si no hay precio."
+                aria-label="Precio de {{ material.name }} con {{ supplier.name }}"
+              >
+            </td>
+          {% endfor %}
+          <td class="strong">{{ (prices|min)|money if prices else "-" }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <button class="button primary">Guardar precios</button>
+</form>
+{% endblock %}

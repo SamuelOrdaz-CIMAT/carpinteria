@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Materiales</h1>
+<form class="toolbar" method="post">
+  <input name="name" placeholder="Material" required>
+  <input name="unit" placeholder="Unidad" value="pieza">
+  <input name="category" placeholder="Categoria">
+  <input name="notes" placeholder="Notas">
+  <button class="button primary">Agregar</button>
+</form>
+<div class="panel">
+  <form method="post" action="{{ url_for('update_all_materials') }}">
+    <div class="table-scroll">
+      <table>
+        <thead><tr><th>Material</th><th>Unidad</th><th>Categoria</th><th>Notas</th><th>Eliminar</th></tr></thead>
+        <tbody>
+          {% for material in materials %}
+          <tr>
+            <input type="hidden" name="material_ids" value="{{ material.id }}">
+            <td><input name="name_{{ material.id }}" value="{{ material.name }}" required aria-label="Nombre del material"></td>
+            <td><input name="unit_{{ material.id }}" value="{{ material.unit }}" aria-label="Unidad del material"></td>
+            <td><input name="category_{{ material.id }}" value="{{ material.category }}" aria-label="Categoria del material"></td>
+            <td><input name="notes_{{ material.id }}" value="{{ material.notes }}" aria-label="Notas del material"></td>
+            <td>
+              <button
+                class="button danger"
+                type="submit"
+                form="delete-material-{{ material.id }}"
+                onclick="return confirm('Eliminar este material? Se quitara tambien de recetas y precios.');"
+              >Eliminar</button>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <div class="form-actions">
+      <button class="button primary">Guardar cambios</button>
+    </div>
+  </form>
+  {% for material in materials %}
+    <form id="delete-material-{{ material.id }}" method="post" action="{{ url_for('delete_material', material_id=material.id) }}"></form>
+  {% endfor %}
+</div>
+{% endblock %}

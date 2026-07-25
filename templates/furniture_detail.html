@@ -1,0 +1,181 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="hero small">
+  <div>
+    <p class="eyebrow">Tipo de mueble</p>
+    <h1>{{ furniture.name }}</h1>
+    <p class="muted">{{ furniture.description or "Configura aqui los materiales y el presupuesto base." }}</p>
+  </div>
+  <div class="hero-actions">
+    <a class="button primary" href="{{ url_for('furniture_quote_pdf', furniture_id=furniture.id) }}">Descargar cotizacion PDF</a>
+    <a class="button" href="{{ url_for('furniture') }}">Volver</a>
+  </div>
+</section>
+
+<section class="grid two">
+  <form class="panel stacked-form" method="post" action="{{ url_for('update_furniture', furniture_id=furniture.id) }}">
+    <h2>Datos del mueble</h2>
+    <label>Nombre del tipo de mueble
+      <input name="name" value="{{ furniture.name }}" placeholder="Ej. Closet 2 puertas" required>
+      <span class="field-help">Este nombre aparecera al crear presupuestos.</span>
+    </label>
+    <label>Descripcion o medidas base
+      <input name="description" value="{{ furniture.description }}" placeholder="Ej. 2.40 m x 1.80 m, acabado natural">
+      <span class="field-help">Sirve para identificar el modelo sin abrir el presupuesto.</span>
+    </label>
+    <label>Mano de obra base
+      <input name="labor_cost" type="number" step="0.01" min="0" value="{{ furniture.labor_cost }}" placeholder="Ej. 1500">
+      <span class="field-help">Costo de fabricacion/instalacion para una pieza.</span>
+    </label>
+    <label>Margen de ganancia %
+      <input name="margin_pct" type="number" step="0.01" min="0" value="{{ furniture.margin_pct }}" placeholder="Ej. 30">
+      <span class="field-help">Se suma solo al costo de materiales, no a la mano de obra.</span>
+    </label>
+    <button class="button primary">Guardar datos</button>
+  </form>
+
+  <form class="panel stacked-form" method="post" action="{{ url_for('create_furniture_budget', furniture_id=furniture.id) }}">
+    <h2>Crear presupuesto</h2>
+    <label>Nombre del trabajo
+      <input name="title" value="{{ furniture.name }}" placeholder="Ej. Closet recamara principal">
+      <span class="field-help">Titulo que vera el cliente en el presupuesto.</span>
+    </label>
+    <label>Cliente
+      <input name="customer" placeholder="Ej. Sr. Martinez">
+      <span class="field-help">Nombre de la persona o proyecto.</span>
+    </label>
+    <label>Cantidad de muebles
+      <input name="furniture_qty" type="number" step="0.01" min="0" value="1" placeholder="Ej. 1">
+      <span class="field-help">Cuantas piezas iguales se van a cotizar.</span>
+    </label>
+    <label>Mano de obra para este trabajo
+      <input name="labor_cost" type="number" step="0.01" min="0" value="{{ furniture.labor_cost }}" placeholder="Ej. 1500">
+      <span class="field-help">Puedes cambiarla si este trabajo requiere mas o menos tiempo.</span>
+    </label>
+    <label>Margen de ganancia %
+      <input name="margin_pct" type="number" step="0.01" min="0" value="{{ furniture.margin_pct }}" placeholder="Ej. 30">
+      <span class="field-help">Porcentaje adicional solo sobre materiales.</span>
+    </label>
+    <label>Notas para el presupuesto
+      <input name="notes" placeholder="Ej. Incluye instalacion, acabado mate">
+      <span class="field-help">Condiciones, medidas finales o aclaraciones.</span>
+    </label>
+    <button class="button primary">Generar presupuesto</button>
+  </form>
+</section>
+
+<div class="panel">
+  <h2>Agregar material necesario</h2>
+  <form class="toolbar material-form" method="post">
+    <label>Material
+      <select class="material-picker" name="material_id" required>
+        {% for material in materials %}
+          <option value="{{ material.id }}" data-cheapest="{{ cheapest_labels.get(material.id, 'Mas barato: sin precio capturado') }}">{{ material.name }} ({{ material.unit }})</option>
+        {% endfor %}
+      </select>
+      <span class="field-help">Elige el insumo que se ocupa para una pieza.</span>
+    </label>
+    <label>Cantidad por mueble
+      <input name="quantity" type="number" step="0.001" min="0" value="1" placeholder="Ej. 2">
+      <span class="field-help">Cantidad antes de merma. Ej. 2 tablas o 0.5 litros.</span>
+    </label>
+    <label>Merma %
+      <input name="waste_pct" type="number" step="0.01" min="0" value="0" placeholder="Ej. 10">
+      <span class="field-help">Extra por cortes, desperdicio o ajuste.</span>
+    </label>
+    <label>Donde comprar
+      <select class="supplier-picker" name="preferred_supplier_id">
+        {% set first_material = materials[0] if materials else none %}
+        <option value="">{{ cheapest_labels.get(first_material.id, "Mas barato: sin precio capturado") if first_material else "Mas barato: sin precio capturado" }}</option>
+        {% for supplier in suppliers %}<option value="{{ supplier.id }}">{{ supplier.name }}</option>{% endfor %}
+      </select>
+      <span class="field-help">Puedes fijar proveedor o dejar que busque el menor precio.</span>
+    </label>
+    <label>Notas del material
+      <input name="notes" placeholder="Ej. Color nogal, bisagra suave">
+      <span class="field-help">Especificacion que no se debe olvidar al comprar.</span>
+    </label>
+    <button class="button primary">Agregar</button>
+  </form>
+</div>
+
+<div class="panel">
+  <div class="panel-heading">
+    <h2>Materiales necesarios y costo estimado</h2>
+    <a class="button" href="{{ url_for('furniture_quote_pdf', furniture_id=furniture.id) }}">PDF cotizacion</a>
+  </div>
+  <div class="table-scroll">
+    <table>
+      <thead><tr><th>Material</th><th>Cantidad por mueble</th><th>Merma</th><th>Comprar en</th><th>Precio usado</th><th>Total</th><th>Notas</th><th>Modificar</th><th>Quitar</th></tr></thead>
+      <tbody>
+        {% for item in items %}
+        {% set estimate = estimate_lines[loop.index0] %}
+        <tr>
+          <form method="post" action="{{ url_for('update_furniture_item', item_id=item.id) }}">
+            <td>
+              <select class="table-input material-select material-picker" name="material_id" aria-label="Material">
+                {% for material in materials %}
+                  <option value="{{ material.id }}" data-cheapest="{{ cheapest_labels.get(material.id, 'Mas barato: sin precio capturado') }}" {% if material.id == item.material_id %}selected{% endif %}>{{ material.name }} ({{ material.unit }})</option>
+                {% endfor %}
+              </select>
+            </td>
+            <td>
+              <input class="table-input number-input" name="quantity" type="number" step="0.001" min="0" value="{{ item.quantity }}" aria-label="Cantidad por mueble">
+            </td>
+            <td>
+              <input class="table-input number-input" name="waste_pct" type="number" step="0.01" min="0" value="{{ item.waste_pct }}" aria-label="Merma">
+            </td>
+            <td>
+              <select class="table-input supplier-select supplier-picker" name="preferred_supplier_id" aria-label="Donde comprar">
+                <option value="">{{ cheapest_labels.get(item.material_id, "Mas barato: sin precio capturado") }}</option>
+                {% for supplier in suppliers %}
+                  <option value="{{ supplier.id }}" {% if supplier.id == item.preferred_supplier_id %}selected{% endif %}>{{ supplier.name }}</option>
+                {% endfor %}
+              </select>
+            </td>
+            <td>{{ estimate.unit_price|money }}</td>
+            <td>{{ estimate.total|money }}</td>
+            <td>
+              <input class="table-input notes-input" name="notes" value="{{ item.notes }}" placeholder="Notas" aria-label="Notas del material">
+            </td>
+            <td><button class="button primary">Modificar</button></td>
+          </form>
+          <td>
+            <form method="post" action="{{ url_for('delete_furniture_item', item_id=item.id) }}">
+              <button class="button danger">Quitar</button>
+            </form>
+          </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="9">Aun no tiene materiales asignados.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<section class="totals">
+  <div><span>Materiales</span><strong>{{ material_total|money }}</strong></div>
+  <div><span>Mano de obra</span><strong>{{ furniture.labor_cost|money }}</strong></div>
+  <div><span>Subtotal antes de margen</span><strong>{{ subtotal|money }}</strong></div>
+  <div><span>Margen material {{ furniture.margin_pct }}%</span><strong>{{ margin_amount|money }}</strong></div>
+  <div class="grand"><span>Total por mueble</span><strong>{{ grand_total|money }}</strong></div>
+</section>
+<script>
+  document.querySelectorAll(".material-picker").forEach((materialSelect) => {
+    const container = materialSelect.closest("form") || materialSelect.closest("tr");
+    const supplierSelect = container ? container.querySelector(".supplier-picker") : null;
+    const automaticOption = supplierSelect ? supplierSelect.querySelector('option[value=""]') : null;
+
+    function refreshCheapestLabel() {
+      const selected = materialSelect.options[materialSelect.selectedIndex];
+      if (automaticOption && selected) {
+        automaticOption.textContent = selected.dataset.cheapest || "Mas barato: sin precio capturado";
+      }
+    }
+
+    refreshCheapestLabel();
+    materialSelect.addEventListener("change", refreshCheapestLabel);
+  });
+</script>
+{% endblock %}

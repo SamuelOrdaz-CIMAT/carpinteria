@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="hero small">
+  <div>
+    <p class="eyebrow">Configuracion</p>
+    <h1>Datos del taller</h1>
+    <p class="muted">Estos datos salen en las cotizaciones PDF y mensajes para clientes.</p>
+  </div>
+  <a class="button" href="{{ url_for('backup_database') }}">Descargar respaldo</a>
+</section>
+
+<form class="panel stacked-form" method="post">
+  <label>Nombre del taller
+    <input name="workshop_name" value="{{ settings.workshop_name }}" placeholder="Ej. Carpinteria Samuel">
+  </label>
+  <label>Telefono
+    <input name="phone" value="{{ settings.phone }}" placeholder="Ej. 55 1234 5678">
+  </label>
+  <label>WhatsApp
+    <input name="whatsapp" value="{{ settings.whatsapp }}" placeholder="Ej. 5215512345678">
+    <span class="field-help">Usa lada de pais si quieres enlaces directos. Ej. Mexico: 52 + numero.</span>
+  </label>
+  <label>Direccion o ciudad
+    <input name="address" value="{{ settings.address }}" placeholder="Ej. Ciudad de Mexico">
+  </label>
+  <label>Vigencia de cotizacion
+    <input name="quote_validity" value="{{ settings.quote_validity }}">
+  </label>
+  <label>Condiciones de pago
+    <input name="payment_terms" value="{{ settings.payment_terms }}">
+  </label>
+  <button class="button primary">Guardar configuracion</button>
+</form>
+{% endblock %}

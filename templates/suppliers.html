@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Proveedores</h1>
+<form class="toolbar" method="post">
+  <input name="name" placeholder="Proveedor" required>
+  <input name="contact" placeholder="Telefono/contacto">
+  <input name="address" placeholder="Direccion">
+  <input name="notes" placeholder="Notas">
+  <button class="button primary">Agregar</button>
+</form>
+<div class="panel">
+  <form method="post" action="{{ url_for('update_all_suppliers') }}">
+    <div class="table-scroll">
+      <table>
+        <thead><tr><th>Proveedor</th><th>Contacto</th><th>Direccion</th><th>Notas</th><th>Eliminar</th></tr></thead>
+        <tbody>
+          {% for supplier in suppliers %}
+          <tr>
+            <input type="hidden" name="supplier_ids" value="{{ supplier.id }}">
+            <td><input name="name_{{ supplier.id }}" value="{{ supplier.name }}" required aria-label="Nombre del proveedor"></td>
+            <td><input name="contact_{{ supplier.id }}" value="{{ supplier.contact }}" aria-label="Contacto del proveedor"></td>
+            <td><input name="address_{{ supplier.id }}" value="{{ supplier.address }}" aria-label="Direccion del proveedor"></td>
+            <td><input name="notes_{{ supplier.id }}" value="{{ supplier.notes }}" aria-label="Notas del proveedor"></td>
+            <td>
+              <button
+                class="button danger"
+                type="submit"
+                form="delete-supplier-{{ supplier.id }}"
+                onclick="return confirm('Eliminar este proveedor? Se quitaran sus precios y referencias como proveedor preferido.');"
+              >Eliminar</button>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <div class="form-actions">
+      <button class="button primary">Guardar cambios</button>
+    </div>
+  </form>
+  {% for supplier in suppliers %}
+    <form id="delete-supplier-{{ supplier.id }}" method="post" action="{{ url_for('delete_supplier', supplier_id=supplier.id) }}"></form>
+  {% endfor %}
+</div>
+{% endblock %}

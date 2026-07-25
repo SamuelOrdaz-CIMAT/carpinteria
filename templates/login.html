@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="login-panel">
+  <form class="panel stacked-form" method="post">
+    <h1>Acceso</h1>
+    <p class="muted">Ingresa la contrasena para abrir la base de carpinteria.</p>
+    {% if error %}<div class="flash">{{ error }}</div>{% endif %}
+    <label>Contrasena
+      <input name="password" type="password" required autofocus>
+    </label>
+    <button class="button primary">Entrar</button>
+  </form>
+</section>
+{% endblock %}

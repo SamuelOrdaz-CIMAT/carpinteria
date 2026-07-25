@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="hero">
+  <div>
+    <p class="eyebrow">Base local de trabajo</p>
+    <h1>Precios y presupuestos de carpinteria</h1>
+  </div>
+  <a class="button primary" href="{{ url_for('budgets') }}">Nuevo presupuesto</a>
+</section>
+
+<section class="metrics">
+  <div><span>{{ stats.materials }}</span>Materiales</div>
+  <div><span>{{ stats.suppliers }}</span>Proveedores</div>
+  <div><span>{{ stats.furniture }}</span>Tipos de mueble</div>
+  <div><span>{{ stats.budgets }}</span>Presupuestos</div>
+</section>
+
+<section class="grid two">
+  <div class="panel">
+    <h2>Precios minimos</h2>
+    <table>
+      <thead><tr><th>Material</th><th>Unidad</th><th>Precio</th></tr></thead>
+      <tbody>
+        {% for item in cheapest %}
+          <tr><td>{{ item.name }}</td><td>{{ item.unit }}</td><td>{{ item.min_price|money }}</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <div class="panel">
+    <h2>Presupuestos recientes</h2>
+    <table>
+      <thead><tr><th>Folio</th><th>Trabajo</th><th>Cliente</th></tr></thead>
+      <tbody>
+        {% for budget in recent %}
+          <tr>
+            <td><a href="{{ url_for('budget_detail', budget_id=budget.id) }}">#{{ budget.id }}</a></td>
+            <td>{{ budget.title }}</td>
+            <td>{{ budget.customer or "-" }}</td>
+          </tr>
+        {% else %}
+          <tr><td colspan="3">Todavia no hay presupuestos.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}
