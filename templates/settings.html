@@ -9,26 +9,59 @@
   <a class="button" href="{{ url_for('backup_database') }}">Descargar respaldo</a>
 </section>
 
-<form class="panel stacked-form" method="post">
-  <label>Nombre del taller
-    <input name="workshop_name" value="{{ settings.workshop_name }}" placeholder="Ej. Carpinteria Samuel">
-  </label>
-  <label>Telefono
-    <input name="phone" value="{{ settings.phone }}" placeholder="Ej. 55 1234 5678">
-  </label>
-  <label>WhatsApp
-    <input name="whatsapp" value="{{ settings.whatsapp }}" placeholder="Ej. 5215512345678">
-    <span class="field-help">Usa lada de pais si quieres enlaces directos. Ej. Mexico: 52 + numero.</span>
-  </label>
-  <label>Direccion o ciudad
-    <input name="address" value="{{ settings.address }}" placeholder="Ej. Ciudad de Mexico">
-  </label>
-  <label>Vigencia de cotizacion
-    <input name="quote_validity" value="{{ settings.quote_validity }}">
-  </label>
-  <label>Condiciones de pago
-    <input name="payment_terms" value="{{ settings.payment_terms }}">
-  </label>
-  <button class="button primary">Guardar configuracion</button>
-</form>
+<div class="settings-layout">
+  <form class="panel settings-form" method="post">
+    <div class="panel-heading">
+      <div>
+        <h2>Informacion principal</h2>
+        <p class="section-note">Lo que vera el cliente en la cotizacion y mensajes.</p>
+      </div>
+    </div>
+
+    <div class="settings-grid">
+      <label>Nombre del taller
+        <input name="workshop_name" value="{{ settings.workshop_name }}" placeholder="Ej. Carpinteria Samuel">
+      </label>
+      <label>Telefono
+        <input name="phone" value="{{ settings.phone }}" placeholder="Ej. 55 1234 5678">
+      </label>
+      <label>WhatsApp
+        <input name="whatsapp" value="{{ settings.whatsapp }}" placeholder="Ej. 5215512345678">
+        <span class="field-help">Usa lada de pais para abrir WhatsApp directo. Ej. Mexico: 52 + numero.</span>
+      </label>
+      <label>Direccion o ciudad
+        <input name="address" value="{{ settings.address }}" placeholder="Ej. Ciudad de Mexico">
+      </label>
+    </div>
+
+    <div class="settings-divider"></div>
+
+    <div class="panel-heading compact">
+      <div>
+        <h2>Cotizaciones</h2>
+        <p class="section-note">Texto fijo para vigencia y forma de pago.</p>
+      </div>
+    </div>
+
+    <div class="settings-grid">
+      <label>Vigencia de cotizacion
+        <input name="quote_validity" value="{{ settings.quote_validity }}" placeholder="Ej. 7 dias">
+      </label>
+      <label>Condiciones de pago
+        <input name="payment_terms" value="{{ settings.payment_terms }}" placeholder="Ej. 50% anticipo, 50% contra entrega">
+      </label>
+    </div>
+
+    <div class="form-actions">
+      <button class="button primary">Guardar configuracion</button>
+    </div>
+  </form>
+
+  <aside class="settings-card">
+    <p class="eyebrow">Respaldo</p>
+    <h2>Cuida tu base de datos</h2>
+    <p class="muted">Descarga una copia antes de hacer cambios grandes en materiales, precios o proveedores.</p>
+    <a class="button wide" href="{{ url_for('backup_database') }}">Descargar respaldo</a>
+  </aside>
+</div>
 {% endblock %}
