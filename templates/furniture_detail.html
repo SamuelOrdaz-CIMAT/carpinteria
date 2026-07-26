@@ -62,7 +62,7 @@
         <input name="depth_m" type="number" step="0.001" min="0" value="{{ furniture.depth_m }}" placeholder="Ej. 0.60">
       </label>
     </div>
-    <span class="field-help">Si cambias estas medidas, los materiales marcados por m2 o metro lineal se calculan en proporcion.</span>
+    <span class="field-help">Si cambias estas medidas, los materiales que dependen del tamano se recalculan en proporcion.</span>
     <label>Notas para el presupuesto
       <input name="notes" placeholder="Ej. Incluye instalacion, acabado mate">
       <span class="field-help">Condiciones, medidas finales o aclaraciones.</span>
@@ -82,7 +82,7 @@
   <form method="post">
     <div class="table-scroll">
       <table class="bulk-material-table">
-        <thead><tr><th>Material</th><th>Cantidad base</th><th>Como escala</th><th>Comprar en</th><th>Notas</th><th>Quitar</th></tr></thead>
+        <thead><tr><th>Material</th><th>Cantidad base</th><th>Comprar en</th><th>Notas</th><th>Quitar</th></tr></thead>
         <tbody id="bulk-material-rows">
           {% for _ in range(3) %}
           <tr>
@@ -95,18 +95,6 @@
               </select>
             </td>
             <td><input class="table-input number-input" name="quantity" type="number" step="0.001" min="0" placeholder="Ej. 2" aria-label="Cantidad base"></td>
-            <td>
-              <select class="table-input calc-select" name="calc_method" aria-label="Como se calcula">
-                <option value="area_front">Proporcional al frente</option>
-                <option value="perimeter_front">Proporcional al contorno</option>
-                <option value="area_side">Proporcional al lateral</option>
-                <option value="area_top">Proporcional a cubierta</option>
-                <option value="linear_width">Proporcional al ancho</option>
-                <option value="linear_height">Proporcional al alto</option>
-                <option value="linear_depth">Proporcional al fondo</option>
-                <option value="fixed">No escala</option>
-              </select>
-            </td>
             <td>
               <select class="table-input supplier-select supplier-picker" name="preferred_supplier_id" aria-label="Donde comprar">
                 <option value="">Mas barato: elige material</option>
@@ -137,18 +125,6 @@
       </td>
       <td><input class="table-input number-input" name="quantity" type="number" step="0.001" min="0" placeholder="Ej. 2" aria-label="Cantidad base"></td>
       <td>
-        <select class="table-input calc-select" name="calc_method" aria-label="Como se calcula">
-          <option value="area_front">Proporcional al frente</option>
-          <option value="perimeter_front">Proporcional al contorno</option>
-          <option value="area_side">Proporcional al lateral</option>
-          <option value="area_top">Proporcional a cubierta</option>
-          <option value="linear_width">Proporcional al ancho</option>
-          <option value="linear_height">Proporcional al alto</option>
-          <option value="linear_depth">Proporcional al fondo</option>
-          <option value="fixed">No escala</option>
-        </select>
-      </td>
-      <td>
         <select class="table-input supplier-select supplier-picker" name="preferred_supplier_id" aria-label="Donde comprar">
           <option value="">Mas barato: elige material</option>
           {% for supplier in suppliers %}<option value="{{ supplier.id }}">{{ supplier.name }}</option>{% endfor %}
@@ -167,7 +143,7 @@
   </div>
   <div class="table-scroll">
     <table>
-      <thead><tr><th>Material</th><th>Cantidad base</th><th>Como escala</th><th>Comprar en</th><th>Precio usado</th><th>Total</th><th>Notas</th><th>Modificar</th><th>Quitar</th></tr></thead>
+      <thead><tr><th>Material</th><th>Cantidad base</th><th>Comprar en</th><th>Precio usado</th><th>Total</th><th>Notas</th><th>Modificar</th><th>Quitar</th></tr></thead>
       <tbody>
         {% for item in items %}
         {% set estimate = estimate_lines[loop.index0] %}
@@ -182,18 +158,6 @@
             </td>
             <td>
               <input class="table-input number-input" name="quantity" type="number" step="0.001" min="0" value="{{ item.quantity }}" aria-label="Cantidad base">
-            </td>
-            <td>
-              <select class="table-input calc-select" name="calc_method" aria-label="Como se calcula">
-                <option value="fixed" {% if item.calc_method == "fixed" %}selected{% endif %}>No escala</option>
-                <option value="area_front" {% if item.calc_method == "area_front" %}selected{% endif %}>Proporcional al frente</option>
-                <option value="perimeter_front" {% if item.calc_method == "perimeter_front" %}selected{% endif %}>Proporcional al contorno</option>
-                <option value="area_side" {% if item.calc_method == "area_side" %}selected{% endif %}>Proporcional al lateral</option>
-                <option value="area_top" {% if item.calc_method == "area_top" %}selected{% endif %}>Proporcional a cubierta</option>
-                <option value="linear_width" {% if item.calc_method == "linear_width" %}selected{% endif %}>Proporcional al ancho</option>
-                <option value="linear_height" {% if item.calc_method == "linear_height" %}selected{% endif %}>Proporcional al alto</option>
-                <option value="linear_depth" {% if item.calc_method == "linear_depth" %}selected{% endif %}>Proporcional al fondo</option>
-              </select>
             </td>
             <td>
               <select class="table-input supplier-select supplier-picker" name="preferred_supplier_id" aria-label="Donde comprar">
@@ -217,7 +181,7 @@
           </td>
         </tr>
         {% else %}
-        <tr><td colspan="9">Aun no tiene materiales asignados.</td></tr>
+        <tr><td colspan="8">Aun no tiene materiales asignados.</td></tr>
         {% endfor %}
       </tbody>
     </table>

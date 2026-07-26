@@ -144,10 +144,6 @@ def infer_existing_calc_methods(conn: sqlite3.Connection) -> None:
     done = conn.execute("SELECT value FROM settings WHERE key = 'calc_methods_inferred_v1'").fetchone()
     if done:
         return
-    rules = (
-        ("perimeter_front", ("chambrana", "caobilla", "moldura", "marco", "zoclo", "canto")),
-        ("area_front", ("triplay", "plywood", "mdf", "melamina", "aglomerado", "thiner", "thinner", "mancha", "fondo", "brillo", "barniz", "laca", "pintura", "sellador")),
-    )
     rows = conn.execute(
         """
         SELECT fi.id, m.name
@@ -157,12 +153,36 @@ def infer_existing_calc_methods(conn: sqlite3.Connection) -> None:
         """
     ).fetchall()
     for row in rows:
-        material_name = row["name"].lower()
-        for method, keywords in rules:
-            if any(keyword in material_name for keyword in keywords):
-                conn.execute("UPDATE furniture_items SET calc_method = ? WHERE id = ?", (method, row["id"]))
-                break
+        method = infer_calc_method(row["name"])
+        if method != "fixed":
+            conn.execute("UPDATE furniture_items SET calc_method = ? WHERE id = ?", (method, row["id"]))
     conn.execute("INSERT INTO settings (key, value) VALUES ('calc_methods_inferred_v1', '1')")
+
+
+def infer_calc_method(material_name: str) -> str:
+    normalized = material_name.lower()
+    perimeter_keywords = ("chambrana", "caobilla", "moldura", "marco", "zoclo", "canto")
+    area_keywords = (
+        "triplay",
+        "plywood",
+        "mdf",
+        "melamina",
+        "aglomerado",
+        "thiner",
+        "thinner",
+        "mancha",
+        "fondo",
+        "brillo",
+        "barniz",
+        "laca",
+        "pintura",
+        "sellador",
+    )
+    if any(keyword in normalized for keyword in perimeter_keywords):
+        return "perimeter_front"
+    if any(keyword in normalized for keyword in area_keywords):
+        return "area_front"
+    return "fixed"
 
 
 def get_settings(conn: sqlite3.Connection) -> dict:

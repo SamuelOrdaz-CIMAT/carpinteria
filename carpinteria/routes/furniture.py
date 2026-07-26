@@ -1,6 +1,6 @@
 from datetime import datetime
 from flask import Response, abort, flash, redirect, render_template, request, url_for
-from carpinteria.database import db, get_settings
+from carpinteria.database import db, get_settings, infer_calc_method
 from carpinteria.services.budgets import create_budget_from_furniture, estimate_furniture, furniture_quote_data
 from carpinteria.services.pdf import build_catalog_pdf, build_furniture_quote_pdf
 from carpinteria.services.pricing import cheapest_supplier_labels
@@ -113,7 +113,6 @@ def register(app):
                 inserted = 0
                 material_ids = request.form.getlist("material_id")
                 quantities = request.form.getlist("quantity")
-                calc_methods = request.form.getlist("calc_method")
                 supplier_ids = request.form.getlist("preferred_supplier_id")
                 notes_values = request.form.getlist("notes")
 
@@ -121,7 +120,8 @@ def register(app):
                     if not material_id:
                         continue
                     quantity = quantities[index] if index < len(quantities) else ""
-                    calc_method = calc_methods[index] if index < len(calc_methods) else "fixed"
+                    material_row = conn.execute("SELECT name FROM materials WHERE id = ?", (int(material_id),)).fetchone()
+                    calc_method = infer_calc_method(material_row["name"]) if material_row else "fixed"
                     preferred_supplier_id = supplier_ids[index] if index < len(supplier_ids) else ""
                     notes = notes_values[index] if index < len(notes_values) else ""
                     conn.execute(
@@ -219,6 +219,8 @@ def register(app):
             row = conn.execute("SELECT furniture_type_id FROM furniture_items WHERE id = ?", (item_id,)).fetchone()
             if not row:
                 abort(404)
+            material_id = int(request.form["material_id"])
+            material_row = conn.execute("SELECT name FROM materials WHERE id = ?", (material_id,)).fetchone()
             conn.execute(
                 """
                 UPDATE furniture_items
@@ -226,9 +228,9 @@ def register(app):
                 WHERE id = ?
                 """,
                 (
-                    int(request.form["material_id"]),
+                    material_id,
                     float(request.form.get("quantity") or 1),
-                    request.form.get("calc_method") or "fixed",
+                    infer_calc_method(material_row["name"]) if material_row else "fixed",
                     int(request.form["preferred_supplier_id"]) if request.form.get("preferred_supplier_id") else None,
                     request.form.get("notes", "").strip(),
                     item_id,
