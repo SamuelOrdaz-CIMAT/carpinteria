@@ -84,7 +84,7 @@
       <table class="bulk-material-table">
         <thead><tr><th>Material</th><th>Cantidad base</th><th>Comprar en</th><th>Notas</th><th>Quitar</th></tr></thead>
         <tbody id="bulk-material-rows">
-          {% for _ in range(3) %}
+          {% for _ in range(1) %}
           <tr>
             <td>
               <select class="table-input material-select material-picker" name="material_id" aria-label="Material">
@@ -273,11 +273,15 @@
 
     refreshCheapestLabel();
     materialSelect.addEventListener("change", refreshCheapestLabel);
+    materialSelect.addEventListener("change", () => ensureTrailingBulkRow(materialSelect));
   }
 
   function bindBulkRow(row) {
     row.querySelectorAll(".row-remove").forEach((button) => {
-      button.addEventListener("click", () => row.remove());
+      button.addEventListener("click", () => {
+        row.remove();
+        ensureTrailingBulkRow();
+      });
     });
   }
 
@@ -292,9 +296,36 @@
     tbody.appendChild(row);
     row.querySelectorAll(".material-picker").forEach(bindMaterialPicker);
     bindBulkRow(row);
+    return row;
+  }
+
+  function bulkRows() {
+    return Array.from(document.querySelectorAll("#bulk-material-rows tr"));
+  }
+
+  function rowHasMaterial(row) {
+    return Boolean(row.querySelector(".material-picker")?.value);
+  }
+
+  function ensureTrailingBulkRow(changedSelect) {
+    const tbody = document.getElementById("bulk-material-rows");
+    if (!tbody) return;
+    const rows = bulkRows();
+    const hasEmptyRow = rows.some((row) => !rowHasMaterial(row));
+    if (!rows.length || !hasEmptyRow) {
+      addBulkMaterialRow();
+      return;
+    }
+    if (!changedSelect?.value) return;
+    const changedRow = changedSelect.closest("tr");
+    const lastRow = rows[rows.length - 1];
+    if (changedRow === lastRow) {
+      addBulkMaterialRow();
+    }
   }
 
   document.getElementById("add-material-row")?.addEventListener("click", addBulkMaterialRow);
   document.getElementById("add-material-row-bottom")?.addEventListener("click", addBulkMaterialRow);
+  ensureTrailingBulkRow();
 </script>
 {% endblock %}
