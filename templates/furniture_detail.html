@@ -154,14 +154,62 @@
   </div>
 </div>
 
-<section class="totals">
-  <div><span>Materiales</span><strong>{{ material_total|money }}</strong></div>
-  <div><span>Mano de obra</span><strong>{{ furniture.labor_cost|money }}</strong></div>
-  <div><span>Subtotal antes de margen</span><strong>{{ subtotal|money }}</strong></div>
-  <div><span>Margen material {{ furniture.margin_pct }}%</span><strong>{{ margin_amount|money }}</strong></div>
-  <div class="grand"><span>Total por mueble</span><strong>{{ grand_total|money }}</strong></div>
+<section class="estimate-options" data-material-total="{{ material_total }}">
+  <div class="estimate-card">
+    <p class="eyebrow">Estimacion 1</p>
+    <h2>Por tiempo de trabajo</h2>
+    <p class="section-note">Aqui no se suma margen sobre material. Solo materiales mas mano de obra por dias.</p>
+    <div class="estimate-controls">
+      <label>Dias de trabajo
+        <input id="labor-days" type="number" step="0.5" min="0" value="1">
+      </label>
+      <label>Pago por dia
+        <select id="day-rate">
+          <option value="1000">$1,000 por dia</option>
+          <option value="1500">$1,500 por dia</option>
+        </select>
+      </label>
+    </div>
+    <div class="estimate-lines">
+      <div><span>Materiales</span><strong>{{ material_total|money }}</strong></div>
+      <div><span>Mano de obra por tiempo</span><strong id="time-labor-total">$1,000.00</strong></div>
+      <div class="grand"><span>Total estimado</span><strong id="time-grand-total">$0.00</strong></div>
+    </div>
+  </div>
+
+  <div class="estimate-card material-margin">
+    <p class="eyebrow">Estimacion 2</p>
+    <h2>Por margen fijo de material</h2>
+    <p class="section-note">No usa dias ni mano de obra. Duplica el material con margen fijo del 100%.</p>
+    <div class="estimate-lines">
+      <div><span>Materiales</span><strong>{{ material_total|money }}</strong></div>
+      <div><span>Margen fijo 100%</span><strong>{{ material_total|money }}</strong></div>
+      <div class="grand"><span>Total estimado</span><strong>{{ (material_total * 2)|money }}</strong></div>
+    </div>
+  </div>
 </section>
 <script>
+  const estimateOptions = document.querySelector(".estimate-options");
+  const materialTotal = estimateOptions ? Number(estimateOptions.dataset.materialTotal || 0) : 0;
+  const moneyFormatter = new Intl.NumberFormat("es-MX", { style: "currency", currency: "MXN" });
+  const laborDaysInput = document.getElementById("labor-days");
+  const dayRateSelect = document.getElementById("day-rate");
+  const timeLaborTotal = document.getElementById("time-labor-total");
+  const timeGrandTotal = document.getElementById("time-grand-total");
+
+  function refreshTimeEstimate() {
+    if (!laborDaysInput || !dayRateSelect || !timeLaborTotal || !timeGrandTotal) return;
+    const days = Number(laborDaysInput.value || 0);
+    const dayRate = Number(dayRateSelect.value || 0);
+    const laborTotal = days * dayRate;
+    timeLaborTotal.textContent = moneyFormatter.format(laborTotal);
+    timeGrandTotal.textContent = moneyFormatter.format(materialTotal + laborTotal);
+  }
+
+  laborDaysInput?.addEventListener("input", refreshTimeEstimate);
+  dayRateSelect?.addEventListener("change", refreshTimeEstimate);
+  refreshTimeEstimate();
+
   document.querySelectorAll(".material-picker").forEach((materialSelect) => {
     const container = materialSelect.closest("form") || materialSelect.closest("tr");
     const supplierSelect = container ? container.querySelector(".supplier-picker") : null;

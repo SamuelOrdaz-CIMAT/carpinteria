@@ -126,7 +126,7 @@ h2 { margin: 0 0 14px; font-size: 18px; }
   margin-bottom: 18px;
 }
 
-.metrics div, .panel, .totals div, .flash, .quick-card {
+.metrics div, .panel, .totals div, .flash, .quick-card, .estimate-card {
   background: var(--panel);
   border: 1px solid var(--line);
   border-radius: 8px;
@@ -473,6 +473,71 @@ td .button { width: 100%; }
   box-shadow: inset 0 4px 0 var(--green);
 }
 
+.estimate-options {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  margin-top: 18px;
+}
+
+.estimate-card {
+  padding: 18px;
+  background: linear-gradient(180deg, #fffaf2, #fff4e4);
+  box-shadow: inset 0 4px 0 var(--wood);
+}
+
+.estimate-card h2 {
+  color: var(--wood-dark);
+}
+
+.estimate-card.material-margin {
+  background: linear-gradient(180deg, #f1fbf6, #fffaf2);
+  box-shadow: inset 0 4px 0 var(--green);
+}
+
+.estimate-controls {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(130px, 1fr));
+  gap: 12px;
+  margin: 14px 0;
+}
+
+.estimate-lines {
+  display: grid;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.estimate-lines div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(138, 79, 36, .22);
+}
+
+.estimate-lines span {
+  color: var(--muted);
+}
+
+.estimate-lines strong {
+  color: var(--ink);
+  font-size: 18px;
+}
+
+.estimate-lines .grand {
+  padding: 12px;
+  border: 1px solid #8fc6b3;
+  border-radius: 8px;
+  background: #ecfaf4;
+}
+
+.estimate-lines .grand strong {
+  color: var(--green-dark);
+  font-size: 22px;
+}
+
 @media (max-width: 860px) {
   .topbar {
     align-items: flex-start;
@@ -498,7 +563,7 @@ td .button { width: 100%; }
   }
 
   .hero { align-items: stretch; flex-direction: column; }
-  .metrics, .grid.two, .totals { grid-template-columns: 1fr; }
+  .metrics, .grid.two, .totals, .estimate-options { grid-template-columns: 1fr; }
   .quick-actions { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .settings-layout, .settings-grid { grid-template-columns: 1fr; }
   .toolbar, .budget-form, .budget-edit-form { grid-template-columns: 1fr; }
@@ -557,6 +622,10 @@ td .button { width: 100%; }
 
   .quick-card {
     min-height: auto;
+  }
+
+  .estimate-controls {
+    grid-template-columns: 1fr;
   }
 
   .metrics div,

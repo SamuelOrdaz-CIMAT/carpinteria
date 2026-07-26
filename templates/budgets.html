@@ -1,7 +1,14 @@
 {% extends "base.html" %}
 {% block content %}
-<h1>Presupuestos</h1>
-<form class="toolbar budget-form" method="post">
+<section class="hero small">
+  <div>
+    <p class="eyebrow">Cotizaciones</p>
+    <h1>Presupuestos</h1>
+    <p class="muted">Crea, modifica, descarga o elimina cotizaciones para tus clientes.</p>
+  </div>
+</section>
+
+<form class="panel toolbar budget-form" method="post">
   <label>Nombre del trabajo
     <input name="title" placeholder="Ej. Cocina casa Lopez">
     <span class="field-help">Titulo interno y del presupuesto.</span>
