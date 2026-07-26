@@ -9,10 +9,24 @@ def fetch_dashboard(conn: sqlite3.Connection) -> dict:
     }
     cheapest = conn.execute(
         """
-        SELECT m.name, m.unit, MIN(mp.price) AS min_price
+        SELECT
+            m.name,
+            m.unit,
+            best.price AS min_price,
+            s.name AS supplier_name
         FROM materials m
-        LEFT JOIN material_prices mp ON mp.material_id = m.id AND mp.price IS NOT NULL
-        GROUP BY m.id
+        LEFT JOIN material_prices best
+          ON best.material_id = m.id
+         AND best.supplier_id = (
+            SELECT mp.supplier_id
+            FROM material_prices mp
+            JOIN suppliers ms ON ms.id = mp.supplier_id
+            WHERE mp.material_id = m.id
+              AND mp.price IS NOT NULL
+            ORDER BY mp.price ASC, ms.name ASC
+            LIMIT 1
+         )
+        LEFT JOIN suppliers s ON s.id = best.supplier_id
         ORDER BY m.name
         LIMIT 8
         """

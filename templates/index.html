@@ -3,9 +3,43 @@
 <section class="hero">
   <div>
     <p class="eyebrow">Base local de trabajo</p>
-    <h1>Precios y presupuestos de carpinteria</h1>
+    <h1>Centro de presupuestos de carpinteria</h1>
+    <p class="muted">Accede rapido a materiales, proveedores, precios y cotizaciones.</p>
   </div>
   <a class="button primary" href="{{ url_for('budgets') }}">Nuevo presupuesto</a>
+</section>
+
+<section class="quick-actions">
+  <a class="quick-card primary" href="{{ url_for('budgets') }}">
+    <span>Presupuestos</span>
+    <strong>Crear o modificar cotizaciones</strong>
+    <small>Calcula materiales, mano de obra, margen y PDF.</small>
+  </a>
+  <a class="quick-card" href="{{ url_for('furniture') }}">
+    <span>Muebles</span>
+    <strong>Armar recetas por tipo</strong>
+    <small>Define que lleva cada puerta, closet, cocina o mueble.</small>
+  </a>
+  <a class="quick-card" href="{{ url_for('prices') }}">
+    <span>Precios</span>
+    <strong>Actualizar costos por proveedor</strong>
+    <small>Compara precios y usa el mas barato al cotizar.</small>
+  </a>
+  <a class="quick-card" href="{{ url_for('materials') }}">
+    <span>Materiales</span>
+    <strong>Catalogo de insumos</strong>
+    <small>Agrega, modifica o elimina materiales del taller.</small>
+  </a>
+  <a class="quick-card" href="{{ url_for('suppliers') }}">
+    <span>Proveedores</span>
+    <strong>Contactos y lugares de compra</strong>
+    <small>Administra donde comprar y sus datos importantes.</small>
+  </a>
+  <a class="quick-card" href="{{ url_for('settings') }}">
+    <span>Configuracion</span>
+    <strong>Datos del taller y respaldo</strong>
+    <small>Ajusta textos de cotizacion y descarga la base.</small>
+  </a>
 </section>
 
 <section class="metrics">
@@ -20,10 +54,17 @@
     <h2>Precios minimos</h2>
     <div class="table-scroll">
       <table>
-        <thead><tr><th>Material</th><th>Unidad</th><th>Precio</th></tr></thead>
+        <thead><tr><th>Material</th><th>Proveedor</th><th>Unidad</th><th>Precio</th></tr></thead>
         <tbody>
           {% for item in cheapest %}
-            <tr><td>{{ item.name }}</td><td>{{ item.unit }}</td><td>{{ item.min_price|money }}</td></tr>
+            <tr>
+              <td>{{ item.name }}</td>
+              <td>{{ item.supplier_name or "-" }}</td>
+              <td>{{ item.unit }}</td>
+              <td>{{ item.min_price|money if item.min_price is not none else "-" }}</td>
+            </tr>
+          {% else %}
+            <tr><td colspan="4">Todavia no hay precios capturados.</td></tr>
           {% endfor %}
         </tbody>
       </table>
