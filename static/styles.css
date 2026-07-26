@@ -12,6 +12,7 @@
   --gold: #a66a2a;
   --red: #a21f18;
   --red-soft: #fff1ef;
+  --button-height: 42px;
 }
 
 * { box-sizing: border-box; }
@@ -335,8 +336,6 @@ label {
 
 .settings-card .button {
   margin-top: 8px;
-  border-color: var(--wood);
-  color: var(--wood-dark);
 }
 
 .material-form {
@@ -348,20 +347,25 @@ label {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 38px;
-  padding: 8px 13px;
-  border: 1px solid #b89263;
+  min-height: var(--button-height);
+  padding: 0 16px;
+  border: 1px solid var(--wood);
   border-radius: 6px;
-  background: #fffaf2;
+  background: #fff1d9;
   color: var(--wood-dark);
+  font-size: 14px;
   font-weight: 700;
+  line-height: 1;
   cursor: pointer;
   white-space: nowrap;
+  box-shadow: inset 0 -1px 0 rgba(75, 40, 21, .12);
+  transition: background-color .15s ease, border-color .15s ease, color .15s ease, transform .15s ease;
 }
 
 .button:hover {
-  border-color: var(--wood);
-  background: var(--wood-soft);
+  border-color: var(--wood-dark);
+  background: #f1dfc4;
+  color: var(--wood-dark);
 }
 
 .button:focus-visible {
@@ -370,7 +374,7 @@ label {
 }
 
 .button.primary {
-  border-color: var(--green);
+  border-color: var(--green-dark);
   background: var(--green);
   color: #ffffff;
 }
@@ -381,14 +385,15 @@ label {
 }
 
 .button.danger {
-  border-color: #d7a29c;
-  background: var(--red-soft);
-  color: var(--red);
+  border-color: #8f1e18;
+  background: var(--red);
+  color: #ffffff;
 }
 
 .button.danger:hover {
-  border-color: var(--red);
-  background: #ffe1dc;
+  border-color: #6f140f;
+  background: #861812;
+  color: #ffffff;
 }
 
 .flash {
@@ -438,7 +443,11 @@ tbody tr:hover {
   background: #f7e3c5;
 }
 
-td .button { width: 100%; }
+td form { margin: 0; }
+td .button {
+  width: 100%;
+  min-width: 92px;
+}
 
 .price-input {
   min-width: 94px;
