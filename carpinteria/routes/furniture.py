@@ -2,8 +2,39 @@ from datetime import datetime
 from flask import Response, abort, flash, redirect, render_template, request, url_for
 from carpinteria.database import db, get_settings
 from carpinteria.services.budgets import create_budget_from_furniture, estimate_furniture, furniture_quote_data
-from carpinteria.services.pdf import build_furniture_quote_pdf
+from carpinteria.services.pdf import build_catalog_pdf, build_furniture_quote_pdf
 from carpinteria.services.pricing import cheapest_supplier_labels
+
+
+def catalog_entries(conn):
+    entries = []
+    furniture_rows = conn.execute(
+        "SELECT * FROM furniture_types WHERE active = 1 ORDER BY name"
+    ).fetchall()
+    for furniture_row in furniture_rows:
+        items = conn.execute(
+            """
+            SELECT fi.*, m.name AS material_name, m.unit
+            FROM furniture_items fi
+            JOIN materials m ON m.id = fi.material_id
+            WHERE fi.furniture_type_id = ?
+            ORDER BY fi.id
+            """,
+            (furniture_row["id"],),
+        ).fetchall()
+        lines = estimate_furniture(conn, items, 1)
+        material_total = sum(line["total"] for line in lines)
+        entries.append(
+            {
+                "id": furniture_row["id"],
+                "name": furniture_row["name"],
+                "description": furniture_row["description"],
+                "material_count": len(lines),
+                "material_total": material_total,
+                "price": material_total * 2,
+            }
+        )
+    return entries
 
 
 def register(app):
@@ -37,35 +68,23 @@ def register(app):
 
     @app.route("/catalog")
     def catalog():
-        entries = []
         with db() as conn:
-            furniture_rows = conn.execute(
-                "SELECT * FROM furniture_types WHERE active = 1 ORDER BY name"
-            ).fetchall()
-            for furniture_row in furniture_rows:
-                items = conn.execute(
-                    """
-                    SELECT fi.*, m.name AS material_name, m.unit
-                    FROM furniture_items fi
-                    JOIN materials m ON m.id = fi.material_id
-                    WHERE fi.furniture_type_id = ?
-                    ORDER BY fi.id
-                    """,
-                    (furniture_row["id"],),
-                ).fetchall()
-                lines = estimate_furniture(conn, items, 1)
-                material_total = sum(line["total"] for line in lines)
-                entries.append(
-                    {
-                        "id": furniture_row["id"],
-                        "name": furniture_row["name"],
-                        "description": furniture_row["description"],
-                        "material_count": len(lines),
-                        "material_total": material_total,
-                        "price": material_total * 2,
-                    }
-                )
+            entries = catalog_entries(conn)
         return render_template("catalog.html", entries=entries)
+
+
+    @app.route("/catalog.pdf")
+    def catalog_pdf():
+        with db() as conn:
+            entries = catalog_entries(conn)
+            workshop = get_settings(conn)
+        pdf_bytes = build_catalog_pdf(entries, workshop)
+        filename = f"catalogo_muebles_{datetime.now().strftime('%Y%m%d')}.pdf"
+        return Response(
+            pdf_bytes,
+            mimetype="application/pdf",
+            headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+        )
 
 
     @app.route("/furniture/<int:furniture_id>", methods=["GET", "POST"])

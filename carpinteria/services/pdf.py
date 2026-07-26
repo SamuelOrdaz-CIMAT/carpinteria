@@ -196,6 +196,50 @@ def build_furniture_quote_pdf(
     return pdf.finish()
 
 
+def build_catalog_pdf(entries, workshop=None) -> bytes:
+    c = PDF_COLORS
+    workshop = workshop or DEFAULT_SETTINGS
+    created_at = datetime.now().strftime("%Y-%m-%d")
+    pdf = PdfCanvas()
+    pdf.rect(0, 0, pdf.width, pdf.height, stroke=None, fill="#FFFCF6")
+    pdf.rect(0, pdf.height - 104, pdf.width, 104, stroke=None, fill=c["walnut"])
+    pdf.rect(0, pdf.height - 108, pdf.width, 8, stroke=None, fill=c["wood"])
+    pdf.text(42, 740, fit_text(workshop.get("workshop_name") or "Carpinteria", 34), 20, True, "#FFFFFF")
+    pdf.text(42, 716, "Catalogo de muebles", 12, False, c["sawdust"])
+    contact = " | ".join(part for part in [workshop.get("phone"), workshop.get("address")] if part)
+    if contact:
+        pdf.text(42, 698, fit_text(contact, 64), 9, False, c["sawdust"])
+    pdf.right_text(570, 740, f"Fecha: {created_at}", 10, False, "#FFFFFF")
+
+    pdf.y = 646
+    pdf.text(42, pdf.y, "Lista de precios", 18, True, c["ink"])
+    pdf.text(42, pdf.y - 20, "Precios finales calculados con margen fijo del 100% sobre materiales.", 10, False, c["muted"])
+    pdf.y -= 54
+
+    headers = ["Mueble", "Caracteristicas", "Materiales", "Precio final"]
+    widths = [150, 220, 75, 95]
+    x0 = 42
+    row_h = 32
+    draw_table_header(pdf, x0, pdf.y, headers, widths, c)
+    pdf.y -= row_h
+    for item in entries:
+        pdf.ensure_space(row_h + 80)
+        values = [
+            fit_text(item["name"], 24),
+            fit_text(item["description"] or "-", 38),
+            str(item["material_count"]),
+            money(item["price"]),
+        ]
+        draw_table_row(pdf, x0, pdf.y, values, widths, c)
+        pdf.y -= row_h
+    if not entries:
+        pdf.text(x0 + 8, pdf.y + 8, "No hay muebles capturados en el catalogo.", 10, False, c["muted"])
+
+    pdf.y = max(pdf.y - 38, 90)
+    pdf.text(42, pdf.y, fit_text(workshop.get("quote_validity"), 105), 9, False, c["muted"])
+    return pdf.finish()
+
+
 def draw_quote_table(pdf: PdfCanvas, lines, colors):
     headers = ["Material", "Proveedor", "Cant.", "Unidad", "Precio", "Total"]
     widths = [190, 110, 48, 54, 70, 70]
