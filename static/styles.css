@@ -252,6 +252,17 @@ h2 { margin: 0 0 14px; font-size: 18px; }
   font-size: 26px;
 }
 
+.catalog-actions {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 10px;
+}
+
+.catalog-actions form,
+.catalog-actions .button {
+  width: 100%;
+}
+
 .grid.two {
   display: grid;
   grid-template-columns: 1fr 1fr;

@@ -21,7 +21,13 @@
       <span>Precio</span>
       <strong>{{ item.price|money }}</strong>
     </div>
-    <a class="button" href="{{ url_for('furniture_detail', furniture_id=item.id) }}">Ver mueble</a>
+    <div class="catalog-actions">
+      <a class="button" href="{{ url_for('furniture_detail', furniture_id=item.id) }}">Ver mueble</a>
+      <form method="post" action="{{ url_for('delete_furniture', furniture_id=item.id) }}" onsubmit="return confirm('Eliminar este mueble del catalogo?');">
+        <input type="hidden" name="next" value="{{ url_for('catalog') }}">
+        <button class="button danger">Eliminar</button>
+      </form>
+    </div>
   </article>
   {% else %}
   <div class="panel">

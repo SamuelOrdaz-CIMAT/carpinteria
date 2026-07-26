@@ -202,6 +202,18 @@ def register(app):
         return redirect(url_for("furniture_detail", furniture_id=furniture_id))
 
 
+    @app.route("/furniture/<int:furniture_id>/delete", methods=["POST"])
+    def delete_furniture(furniture_id: int):
+        with db() as conn:
+            row = conn.execute("SELECT id FROM furniture_types WHERE id = ?", (furniture_id,)).fetchone()
+            if not row:
+                abort(404)
+            conn.execute("UPDATE furniture_types SET active = 0 WHERE id = ?", (furniture_id,))
+        flash("Mueble eliminado del catalogo.")
+        next_page = request.form.get("next") or url_for("catalog")
+        return redirect(next_page)
+
+
     @app.route("/furniture-item/<int:item_id>/delete", methods=["POST"])
     def delete_furniture_item(item_id: int):
         with db() as conn:
