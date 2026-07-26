@@ -1,7 +1,14 @@
 {% extends "base.html" %}
 {% block content %}
-<h1>Tipos de mueble</h1>
-<form class="toolbar" method="post">
+<section class="hero small">
+  <div>
+    <p class="eyebrow">Recetas</p>
+    <h1>Tipos de mueble</h1>
+    <p class="muted">Define modelos base y despues asigna sus materiales necesarios.</p>
+  </div>
+</section>
+
+<form class="panel toolbar" method="post">
   <label>Tipo de mueble
     <input name="name" placeholder="Ej. Closet, cocina integral, buro" required>
     <span class="field-help">Nombre general del mueble que se repetira en presupuestos.</span>

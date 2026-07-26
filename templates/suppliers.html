@@ -1,7 +1,14 @@
 {% extends "base.html" %}
 {% block content %}
-<h1>Proveedores</h1>
-<form class="toolbar" method="post">
+<section class="hero small">
+  <div>
+    <p class="eyebrow">Compras</p>
+    <h1>Proveedores</h1>
+    <p class="muted">Contactos y lugares donde compras materiales para el taller.</p>
+  </div>
+</section>
+
+<form class="panel toolbar" method="post">
   <input name="name" placeholder="Proveedor" required>
   <input name="contact" placeholder="Telefono/contacto">
   <input name="address" placeholder="Direccion">

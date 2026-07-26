@@ -1,7 +1,14 @@
 {% extends "base.html" %}
 {% block content %}
-<h1>Materiales</h1>
-<form class="toolbar" method="post">
+<section class="hero small">
+  <div>
+    <p class="eyebrow">Catalogo</p>
+    <h1>Materiales</h1>
+    <p class="muted">Insumos, unidades y notas para armar muebles y presupuestos.</p>
+  </div>
+</section>
+
+<form class="panel toolbar" method="post">
   <input name="name" placeholder="Material" required>
   <input name="unit" placeholder="Unidad" value="pieza">
   <input name="category" placeholder="Categoria">
