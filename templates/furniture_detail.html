@@ -83,6 +83,7 @@
     <div class="quick-material-picker" data-open="false">
       <button class="button quick-material-toggle" type="button" aria-expanded="false">Elegir materiales</button>
       <div class="quick-material-menu" hidden>
+        <input class="quick-material-search" type="search" placeholder="Buscar material" aria-label="Buscar material">
         {% for material in materials %}
           <button
             type="button"
@@ -375,6 +376,13 @@
 
   quickPicker?.querySelectorAll(".quick-material-option").forEach((button) => {
     button.addEventListener("click", () => addMaterialFromQuickPicker(button.dataset.materialId));
+  });
+
+  quickPicker?.querySelector(".quick-material-search")?.addEventListener("input", (event) => {
+    const search = event.target.value.trim().toLowerCase();
+    quickPicker.querySelectorAll(".quick-material-option").forEach((button) => {
+      button.hidden = search && !button.textContent.toLowerCase().includes(search);
+    });
   });
 </script>
 {% endblock %}
