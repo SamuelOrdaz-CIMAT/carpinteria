@@ -97,13 +97,14 @@
             <td><input class="table-input number-input" name="quantity" type="number" step="0.001" min="0" placeholder="Ej. 2" aria-label="Cantidad base"></td>
             <td>
               <select class="table-input calc-select" name="calc_method" aria-label="Como se calcula">
-                <option value="fixed">No escala</option>
                 <option value="area_front">Proporcional al frente</option>
+                <option value="perimeter_front">Proporcional al contorno</option>
                 <option value="area_side">Proporcional al lateral</option>
                 <option value="area_top">Proporcional a cubierta</option>
                 <option value="linear_width">Proporcional al ancho</option>
                 <option value="linear_height">Proporcional al alto</option>
                 <option value="linear_depth">Proporcional al fondo</option>
+                <option value="fixed">No escala</option>
               </select>
             </td>
             <td>
@@ -137,13 +138,14 @@
       <td><input class="table-input number-input" name="quantity" type="number" step="0.001" min="0" placeholder="Ej. 2" aria-label="Cantidad base"></td>
       <td>
         <select class="table-input calc-select" name="calc_method" aria-label="Como se calcula">
-          <option value="fixed">No escala</option>
           <option value="area_front">Proporcional al frente</option>
+          <option value="perimeter_front">Proporcional al contorno</option>
           <option value="area_side">Proporcional al lateral</option>
           <option value="area_top">Proporcional a cubierta</option>
           <option value="linear_width">Proporcional al ancho</option>
           <option value="linear_height">Proporcional al alto</option>
           <option value="linear_depth">Proporcional al fondo</option>
+          <option value="fixed">No escala</option>
         </select>
       </td>
       <td>
@@ -185,6 +187,7 @@
               <select class="table-input calc-select" name="calc_method" aria-label="Como se calcula">
                 <option value="fixed" {% if item.calc_method == "fixed" %}selected{% endif %}>No escala</option>
                 <option value="area_front" {% if item.calc_method == "area_front" %}selected{% endif %}>Proporcional al frente</option>
+                <option value="perimeter_front" {% if item.calc_method == "perimeter_front" %}selected{% endif %}>Proporcional al contorno</option>
                 <option value="area_side" {% if item.calc_method == "area_side" %}selected{% endif %}>Proporcional al lateral</option>
                 <option value="area_top" {% if item.calc_method == "area_top" %}selected{% endif %}>Proporcional a cubierta</option>
                 <option value="linear_width" {% if item.calc_method == "linear_width" %}selected{% endif %}>Proporcional al ancho</option>

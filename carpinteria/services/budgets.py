@@ -17,6 +17,7 @@ def furniture_measurements(furniture) -> dict:
         "area_front": width * height,
         "area_side": depth * height,
         "area_top": width * depth,
+        "perimeter_front": width + (height * 2),
         "linear_width": width,
         "linear_height": height,
         "linear_depth": depth,
@@ -110,6 +111,17 @@ def budget_quote_data(conn: sqlite3.Connection, budget_id: int):
 
 def replace_budget_lines(conn: sqlite3.Connection, budget_id: int, furniture_id: int, qty: float) -> None:
     conn.execute("DELETE FROM budget_lines WHERE budget_id = ?", (budget_id,))
+    budget = conn.execute("SELECT width_m, height_m, depth_m FROM budgets WHERE id = ?", (budget_id,)).fetchone()
+    furniture = conn.execute("SELECT width_m, height_m, depth_m FROM furniture_types WHERE id = ?", (furniture_id,)).fetchone()
+    if furniture and budget and (not furniture["width_m"] or not furniture["height_m"]) and budget["width_m"] and budget["height_m"]:
+        conn.execute(
+            """
+            UPDATE furniture_types
+            SET width_m = ?, height_m = ?, depth_m = ?
+            WHERE id = ?
+            """,
+            (budget["width_m"], budget["height_m"], budget["depth_m"], furniture_id),
+        )
     items = conn.execute(
         """
         SELECT fi.*, m.name AS material_name, m.unit,
@@ -122,7 +134,6 @@ def replace_budget_lines(conn: sqlite3.Connection, budget_id: int, furniture_id:
         """,
         (furniture_id,),
     ).fetchall()
-    budget = conn.execute("SELECT width_m, height_m, depth_m FROM budgets WHERE id = ?", (budget_id,)).fetchone()
     for line in estimate_furniture(conn, items, qty, budget):
         conn.execute(
             """

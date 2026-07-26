@@ -128,6 +128,7 @@ def initialize() -> None:
         ensure_column(conn, "budgets", "depth_m", "REAL NOT NULL DEFAULT 0")
         for key, value in DEFAULT_SETTINGS.items():
             conn.execute("INSERT OR IGNORE INTO settings (key, value) VALUES (?, ?)", (key, value))
+        infer_existing_calc_methods(conn)
         material_count = conn.execute("SELECT COUNT(*) FROM materials").fetchone()[0]
     if material_count == 0 and SOURCE_XLSX.exists() and openpyxl:
         import_prices_from_excel(SOURCE_XLSX)
@@ -137,6 +138,31 @@ def ensure_column(conn: sqlite3.Connection, table: str, column: str, definition:
     columns = {row["name"] for row in conn.execute(f"PRAGMA table_info({table})").fetchall()}
     if column not in columns:
         conn.execute(f"ALTER TABLE {table} ADD COLUMN {column} {definition}")
+
+
+def infer_existing_calc_methods(conn: sqlite3.Connection) -> None:
+    done = conn.execute("SELECT value FROM settings WHERE key = 'calc_methods_inferred_v1'").fetchone()
+    if done:
+        return
+    rules = (
+        ("perimeter_front", ("chambrana", "caobilla", "moldura", "marco", "zoclo", "canto")),
+        ("area_front", ("triplay", "plywood", "mdf", "melamina", "aglomerado", "thiner", "thinner", "mancha", "fondo", "brillo", "barniz", "laca", "pintura", "sellador")),
+    )
+    rows = conn.execute(
+        """
+        SELECT fi.id, m.name
+        FROM furniture_items fi
+        JOIN materials m ON m.id = fi.material_id
+        WHERE fi.calc_method = 'fixed'
+        """
+    ).fetchall()
+    for row in rows:
+        material_name = row["name"].lower()
+        for method, keywords in rules:
+            if any(keyword in material_name for keyword in keywords):
+                conn.execute("UPDATE furniture_items SET calc_method = ? WHERE id = ?", (method, row["id"]))
+                break
+    conn.execute("INSERT INTO settings (key, value) VALUES ('calc_methods_inferred_v1', '1')")
 
 
 def get_settings(conn: sqlite3.Connection) -> dict:
