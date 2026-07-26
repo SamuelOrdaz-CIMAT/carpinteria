@@ -12,7 +12,7 @@ def estimate_furniture(conn: sqlite3.Connection, items, furniture_qty: float) ->
     lines = []
     for item in items:
         unit_price, supplier_name = best_price(conn, item["material_id"], item["preferred_supplier_id"])
-        line_qty = furniture_qty * item["quantity"] * (1 + (item["waste_pct"] / 100))
+        line_qty = furniture_qty * item["quantity"]
         lines.append(
             {
                 "material_name": item["material_name"],

@@ -14,6 +14,7 @@
       <a href="{{ url_for('suppliers') }}">Proveedores</a>
       <a href="{{ url_for('prices') }}">Precios</a>
       <a href="{{ url_for('furniture') }}">Muebles</a>
+      <a href="{{ url_for('catalog') }}">Catalogo</a>
       <a href="{{ url_for('budgets') }}">Presupuestos</a>
       <a href="{{ url_for('settings') }}">Configuracion</a>
       {% if session.get("authenticated") %}<a href="{{ url_for('logout') }}">Salir</a>{% endif %}

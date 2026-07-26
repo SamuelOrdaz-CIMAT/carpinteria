@@ -59,7 +59,7 @@
   <form method="post">
     <div class="table-scroll">
       <table class="bulk-material-table">
-        <thead><tr><th>Material</th><th>Cantidad por mueble</th><th>Merma %</th><th>Comprar en</th><th>Notas</th><th>Quitar</th></tr></thead>
+        <thead><tr><th>Material</th><th>Cantidad por mueble</th><th>Comprar en</th><th>Notas</th><th>Quitar</th></tr></thead>
         <tbody id="bulk-material-rows">
           {% for _ in range(3) %}
           <tr>
@@ -72,7 +72,6 @@
               </select>
             </td>
             <td><input class="table-input number-input" name="quantity" type="number" step="0.001" min="0" placeholder="Ej. 2" aria-label="Cantidad por mueble"></td>
-            <td><input class="table-input number-input" name="waste_pct" type="number" step="0.01" min="0" value="0" aria-label="Merma"></td>
             <td>
               <select class="table-input supplier-select supplier-picker" name="preferred_supplier_id" aria-label="Donde comprar">
                 <option value="">Mas barato: elige material</option>
@@ -102,7 +101,6 @@
         </select>
       </td>
       <td><input class="table-input number-input" name="quantity" type="number" step="0.001" min="0" placeholder="Ej. 2" aria-label="Cantidad por mueble"></td>
-      <td><input class="table-input number-input" name="waste_pct" type="number" step="0.01" min="0" value="0" aria-label="Merma"></td>
       <td>
         <select class="table-input supplier-select supplier-picker" name="preferred_supplier_id" aria-label="Donde comprar">
           <option value="">Mas barato: elige material</option>
@@ -122,7 +120,7 @@
   </div>
   <div class="table-scroll">
     <table>
-      <thead><tr><th>Material</th><th>Cantidad por mueble</th><th>Merma</th><th>Comprar en</th><th>Precio usado</th><th>Total</th><th>Notas</th><th>Modificar</th><th>Quitar</th></tr></thead>
+      <thead><tr><th>Material</th><th>Cantidad por mueble</th><th>Comprar en</th><th>Precio usado</th><th>Total</th><th>Notas</th><th>Modificar</th><th>Quitar</th></tr></thead>
       <tbody>
         {% for item in items %}
         {% set estimate = estimate_lines[loop.index0] %}
@@ -137,9 +135,6 @@
             </td>
             <td>
               <input class="table-input number-input" name="quantity" type="number" step="0.001" min="0" value="{{ item.quantity }}" aria-label="Cantidad por mueble">
-            </td>
-            <td>
-              <input class="table-input number-input" name="waste_pct" type="number" step="0.01" min="0" value="{{ item.waste_pct }}" aria-label="Merma">
             </td>
             <td>
               <select class="table-input supplier-select supplier-picker" name="preferred_supplier_id" aria-label="Donde comprar">
@@ -163,7 +158,7 @@
           </td>
         </tr>
         {% else %}
-        <tr><td colspan="9">Aun no tiene materiales asignados.</td></tr>
+        <tr><td colspan="8">Aun no tiene materiales asignados.</td></tr>
         {% endfor %}
       </tbody>
     </table>

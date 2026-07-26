@@ -35,6 +35,39 @@ def register(app):
         return render_template("furniture.html", furniture=rows)
 
 
+    @app.route("/catalog")
+    def catalog():
+        entries = []
+        with db() as conn:
+            furniture_rows = conn.execute(
+                "SELECT * FROM furniture_types WHERE active = 1 ORDER BY name"
+            ).fetchall()
+            for furniture_row in furniture_rows:
+                items = conn.execute(
+                    """
+                    SELECT fi.*, m.name AS material_name, m.unit
+                    FROM furniture_items fi
+                    JOIN materials m ON m.id = fi.material_id
+                    WHERE fi.furniture_type_id = ?
+                    ORDER BY fi.id
+                    """,
+                    (furniture_row["id"],),
+                ).fetchall()
+                lines = estimate_furniture(conn, items, 1)
+                material_total = sum(line["total"] for line in lines)
+                entries.append(
+                    {
+                        "id": furniture_row["id"],
+                        "name": furniture_row["name"],
+                        "description": furniture_row["description"],
+                        "material_count": len(lines),
+                        "material_total": material_total,
+                        "price": material_total * 2,
+                    }
+                )
+        return render_template("catalog.html", entries=entries)
+
+
     @app.route("/furniture/<int:furniture_id>", methods=["GET", "POST"])
     def furniture_detail(furniture_id: int):
         with db() as conn:
@@ -45,7 +78,6 @@ def register(app):
                 inserted = 0
                 material_ids = request.form.getlist("material_id")
                 quantities = request.form.getlist("quantity")
-                waste_values = request.form.getlist("waste_pct")
                 supplier_ids = request.form.getlist("preferred_supplier_id")
                 notes_values = request.form.getlist("notes")
 
@@ -53,7 +85,6 @@ def register(app):
                     if not material_id:
                         continue
                     quantity = quantities[index] if index < len(quantities) else ""
-                    waste_pct = waste_values[index] if index < len(waste_values) else ""
                     preferred_supplier_id = supplier_ids[index] if index < len(supplier_ids) else ""
                     notes = notes_values[index] if index < len(notes_values) else ""
                     conn.execute(
@@ -66,7 +97,7 @@ def register(app):
                             furniture_id,
                             int(material_id),
                             float(quantity or 1),
-                            float(waste_pct or 0),
+                            0,
                             int(preferred_supplier_id) if preferred_supplier_id else None,
                             notes.strip(),
                         ),
@@ -148,13 +179,12 @@ def register(app):
             conn.execute(
                 """
                 UPDATE furniture_items
-                SET material_id = ?, quantity = ?, waste_pct = ?, preferred_supplier_id = ?, notes = ?
+                SET material_id = ?, quantity = ?, waste_pct = 0, preferred_supplier_id = ?, notes = ?
                 WHERE id = ?
                 """,
                 (
                     int(request.form["material_id"]),
                     float(request.form.get("quantity") or 1),
-                    float(request.form.get("waste_pct") or 0),
                     int(request.form["preferred_supplier_id"]) if request.form.get("preferred_supplier_id") else None,
                     request.form.get("notes", "").strip(),
                     item_id,

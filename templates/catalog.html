@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="hero small">
+  <div>
+    <p class="eyebrow">Lista de precios</p>
+    <h1>Catalogo</h1>
+    <p class="muted">Precios finales de los muebles agregados, calculados con margen fijo del 100% sobre materiales.</p>
+  </div>
+</section>
+
+<section class="catalog-grid">
+  {% for item in entries %}
+  <article class="catalog-card">
+    <div>
+      <p class="eyebrow">Mueble</p>
+      <h2>{{ item.name }}</h2>
+      <p class="muted">{{ item.description or "Sin descripcion capturada." }}</p>
+    </div>
+    <div class="catalog-meta">
+      <span>{{ item.material_count }} material(es)</span>
+      <span>Material base {{ item.material_total|money }}</span>
+    </div>
+    <div class="catalog-price">
+      <span>Precio final</span>
+      <strong>{{ item.price|money }}</strong>
+    </div>
+    <a class="button" href="{{ url_for('furniture_detail', furniture_id=item.id) }}">Ver mueble</a>
+  </article>
+  {% else %}
+  <div class="panel">
+    <h2>No hay muebles en el catalogo todavia.</h2>
+    <p class="muted">Agrega tipos de mueble y sus materiales para crear la lista de precios.</p>
+    <a class="button primary" href="{{ url_for('furniture') }}">Agregar muebles</a>
+  </div>
+  {% endfor %}
+</section>
+{% endblock %}
