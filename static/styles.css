@@ -369,6 +369,10 @@ label {
   gap: 10px;
 }
 
+.form-wide {
+  grid-column: 1 / -1;
+}
+
 .settings-divider {
   height: 1px;
   margin: 20px 0;

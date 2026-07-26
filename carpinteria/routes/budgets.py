@@ -5,6 +5,14 @@ from carpinteria.services.budgets import budget_quote_data, create_budget_from_f
 from carpinteria.services.pdf import build_furniture_quote_pdf
 
 
+def requested_measurements(form, furniture_row):
+    return (
+        float(form.get("width_m") or furniture_row["width_m"] or 0),
+        float(form.get("height_m") or furniture_row["height_m"] or 0),
+        float(form.get("depth_m") or furniture_row["depth_m"] or 0),
+    )
+
+
 def register(app):
     @app.route("/budgets", methods=["GET", "POST"])
     def budgets():
@@ -14,12 +22,16 @@ def register(app):
                 furniture_id = int(request.form["furniture_type_id"])
                 furniture_row = conn.execute("SELECT * FROM furniture_types WHERE id = ?", (furniture_id,)).fetchone()
                 qty = float(request.form.get("furniture_qty") or 1)
+                width_m, height_m, depth_m = requested_measurements(request.form, furniture_row)
                 budget_id = create_budget_from_furniture(
                     conn,
                     furniture_id,
                     request.form.get("title", "").strip() or furniture_row["name"],
                     request.form.get("customer", "").strip(),
                     qty,
+                    width_m,
+                    height_m,
+                    depth_m,
                     0,
                     100,
                     request.form.get("notes", "").strip(),
@@ -83,11 +95,13 @@ def register(app):
             if not furniture_row:
                 abort(404)
             qty = float(request.form.get("furniture_qty") or 1)
+            width_m, height_m, depth_m = requested_measurements(request.form, furniture_row)
             title = request.form.get("title", "").strip() or furniture_row["name"]
             conn.execute(
                 """
                 UPDATE budgets
                 SET title = ?, customer = ?, furniture_type_id = ?, furniture_qty = ?,
+                    width_m = ?, height_m = ?, depth_m = ?,
                     labor_cost = ?, margin_pct = ?, notes = ?
                 WHERE id = ?
                 """,
@@ -96,6 +110,9 @@ def register(app):
                     request.form.get("customer", "").strip(),
                     furniture_id,
                     qty,
+                    width_m,
+                    height_m,
+                    depth_m,
                     0,
                     100,
                     request.form.get("notes", "").strip(),
@@ -122,11 +139,12 @@ def register(app):
         with db() as conn:
             budget, furniture, lines, material_total, subtotal, margin_amount, grand_total = budget_quote_data(conn, budget_id)
             workshop = get_settings(conn)
+        dimensions = f"{budget['width_m']} x {budget['height_m']} x {budget['depth_m']} m"
         meta = {
             "title": budget["title"],
-            "subtitle": budget["notes"] or budget["furniture_name"] or "",
             "furniture_name": budget["furniture_name"] or budget["title"],
             "quantity": f"{budget['furniture_qty']:.2f}".rstrip("0").rstrip("."),
+            "subtitle": budget["notes"] or dimensions,
             "folio": f"COT-{budget['id']:04d}",
             "customer": budget["customer"],
             "created_at": budget["created_at"].split(" ")[0],

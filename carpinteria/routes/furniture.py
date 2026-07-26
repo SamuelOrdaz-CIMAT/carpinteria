@@ -259,12 +259,18 @@ def register(app):
             if not furniture_row:
                 abort(404)
             qty = float(request.form.get("furniture_qty") or 1)
+            width_m = float(request.form.get("width_m") or furniture_row["width_m"] or 0)
+            height_m = float(request.form.get("height_m") or furniture_row["height_m"] or 0)
+            depth_m = float(request.form.get("depth_m") or furniture_row["depth_m"] or 0)
             budget_id = create_budget_from_furniture(
                 conn,
                 furniture_id,
                 request.form.get("title", "").strip(),
                 request.form.get("customer", "").strip(),
                 qty,
+                width_m,
+                height_m,
+                depth_m,
                 0,
                 100,
                 request.form.get("notes", "").strip(),

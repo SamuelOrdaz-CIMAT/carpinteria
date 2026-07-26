@@ -69,6 +69,9 @@ CREATE TABLE IF NOT EXISTS budgets (
     customer TEXT DEFAULT '',
     furniture_type_id INTEGER,
     furniture_qty REAL NOT NULL DEFAULT 1,
+    width_m REAL NOT NULL DEFAULT 0,
+    height_m REAL NOT NULL DEFAULT 0,
+    depth_m REAL NOT NULL DEFAULT 0,
     labor_cost REAL NOT NULL DEFAULT 0,
     margin_pct REAL NOT NULL DEFAULT 30,
     notes TEXT DEFAULT '',
@@ -120,6 +123,9 @@ def initialize() -> None:
         ensure_column(conn, "furniture_types", "height_m", "REAL NOT NULL DEFAULT 0")
         ensure_column(conn, "furniture_types", "depth_m", "REAL NOT NULL DEFAULT 0")
         ensure_column(conn, "furniture_items", "calc_method", "TEXT NOT NULL DEFAULT 'fixed'")
+        ensure_column(conn, "budgets", "width_m", "REAL NOT NULL DEFAULT 0")
+        ensure_column(conn, "budgets", "height_m", "REAL NOT NULL DEFAULT 0")
+        ensure_column(conn, "budgets", "depth_m", "REAL NOT NULL DEFAULT 0")
         for key, value in DEFAULT_SETTINGS.items():
             conn.execute("INSERT OR IGNORE INTO settings (key, value) VALUES (?, ?)", (key, value))
         material_count = conn.execute("SELECT COUNT(*) FROM materials").fetchone()[0]

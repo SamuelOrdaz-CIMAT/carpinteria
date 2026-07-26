@@ -23,17 +23,26 @@ def furniture_measurements(furniture) -> dict:
     }
 
 
+def measurement_value(furniture, method: str) -> float:
+    return furniture_measurements(furniture).get(method, 1)
+
+
 def calculated_quantity(item, furniture, furniture_qty: float) -> float:
     method = item["calc_method"] if "calc_method" in item.keys() else "fixed"
-    base = furniture_measurements(furniture).get(method, 1)
-    return furniture_qty * item["quantity"] * base
+    if method == "fixed":
+        scale = 1
+    else:
+        base_measure = measurement_value(item, method)
+        target_measure = measurement_value(furniture, method)
+        scale = target_measure / base_measure if base_measure > 0 else 1
+    return furniture_qty * item["quantity"] * scale
 
 
-def estimate_furniture(conn: sqlite3.Connection, items, furniture_qty: float) -> list[dict]:
+def estimate_furniture(conn: sqlite3.Connection, items, furniture_qty: float, dimensions=None) -> list[dict]:
     lines = []
     for item in items:
         unit_price, supplier_name = best_price(conn, item["material_id"], item["preferred_supplier_id"])
-        line_qty = calculated_quantity(item, item, furniture_qty)
+        line_qty = calculated_quantity(item, dimensions or item, furniture_qty)
         lines.append(
             {
                 "material_name": item["material_name"],
@@ -113,7 +122,8 @@ def replace_budget_lines(conn: sqlite3.Connection, budget_id: int, furniture_id:
         """,
         (furniture_id,),
     ).fetchall()
-    for line in estimate_furniture(conn, items, qty):
+    budget = conn.execute("SELECT width_m, height_m, depth_m FROM budgets WHERE id = ?", (budget_id,)).fetchone()
+    for line in estimate_furniture(conn, items, qty, budget):
         conn.execute(
             """
             INSERT INTO budget_lines
@@ -139,6 +149,9 @@ def create_budget_from_furniture(
     title: str,
     customer: str,
     qty: float,
+    width_m: float,
+    height_m: float,
+    depth_m: float,
     labor: float,
     margin: float,
     notes: str,
@@ -149,14 +162,17 @@ def create_budget_from_furniture(
     cur = conn.execute(
         """
         INSERT INTO budgets
-        (title, customer, furniture_type_id, furniture_qty, labor_cost, margin_pct, notes, created_at)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        (title, customer, furniture_type_id, furniture_qty, width_m, height_m, depth_m, labor_cost, margin_pct, notes, created_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """,
         (
             title or furniture_row["name"],
             customer,
             furniture_id,
             qty,
+            width_m,
+            height_m,
+            depth_m,
             labor,
             margin,
             notes,
