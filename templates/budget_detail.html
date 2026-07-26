@@ -48,23 +48,25 @@
 </form>
 
 <div class="panel">
-  <table>
-    <thead><tr><th>Material</th><th>Proveedor</th><th>Cantidad</th><th>Unidad</th><th>Precio</th><th>Total</th></tr></thead>
-    <tbody>
-      {% for line in lines %}
-      <tr>
-        <td>{{ line.material_name }}</td>
-        <td>{{ line.supplier_name or "-" }}</td>
-        <td>{{ "%.3f"|format(line.quantity) }}</td>
-        <td>{{ line.unit }}</td>
-        <td>{{ line.unit_price|money }}</td>
-        <td>{{ line.total|money }}</td>
-      </tr>
-      {% else %}
-      <tr><td colspan="6">El tipo de mueble no tenia materiales capturados al crear este presupuesto.</td></tr>
-      {% endfor %}
-    </tbody>
-  </table>
+  <div class="table-scroll">
+    <table>
+      <thead><tr><th>Material</th><th>Proveedor</th><th>Cantidad</th><th>Unidad</th><th>Precio</th><th>Total</th></tr></thead>
+      <tbody>
+        {% for line in lines %}
+        <tr>
+          <td>{{ line.material_name }}</td>
+          <td>{{ line.supplier_name or "-" }}</td>
+          <td>{{ "%.3f"|format(line.quantity) }}</td>
+          <td>{{ line.unit }}</td>
+          <td>{{ line.unit_price|money }}</td>
+          <td>{{ line.total|money }}</td>
+        </tr>
+        {% else %}
+        <tr><td colspan="6">El tipo de mueble no tenia materiales capturados al crear este presupuesto.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
 </div>
 
 <section class="totals">

@@ -35,28 +35,30 @@
   <button class="button primary">Crear</button>
 </form>
 <div class="panel">
-  <table>
-    <thead><tr><th>Folio</th><th>Trabajo</th><th>Cliente</th><th>Mueble</th><th>Fecha</th><th></th><th></th><th></th></tr></thead>
-    <tbody>
-      {% for budget in budgets %}
-      <tr>
-        <td>#{{ budget.id }}</td>
-        <td>{{ budget.title }}</td>
-        <td>{{ budget.customer or "-" }}</td>
-        <td>{{ budget.furniture_name or "-" }}</td>
-        <td>{{ budget.created_at }}</td>
-        <td><a class="button" href="{{ url_for('budget_detail', budget_id=budget.id) }}">Modificar</a></td>
-        <td><a class="button" href="{{ url_for('budget_quote_pdf', budget_id=budget.id) }}">PDF</a></td>
-        <td>
-          <form method="post" action="{{ url_for('delete_budget', budget_id=budget.id) }}" onsubmit="return confirm('Eliminar este presupuesto? Esta accion no se puede deshacer.');">
-            <button class="button danger">Eliminar</button>
-          </form>
-        </td>
-      </tr>
-      {% else %}
-      <tr><td colspan="8">No hay presupuestos todavia.</td></tr>
-      {% endfor %}
-    </tbody>
-  </table>
+  <div class="table-scroll">
+    <table>
+      <thead><tr><th>Folio</th><th>Trabajo</th><th>Cliente</th><th>Mueble</th><th>Fecha</th><th></th><th></th><th></th></tr></thead>
+      <tbody>
+        {% for budget in budgets %}
+        <tr>
+          <td>#{{ budget.id }}</td>
+          <td>{{ budget.title }}</td>
+          <td>{{ budget.customer or "-" }}</td>
+          <td>{{ budget.furniture_name or "-" }}</td>
+          <td>{{ budget.created_at }}</td>
+          <td><a class="button" href="{{ url_for('budget_detail', budget_id=budget.id) }}">Modificar</a></td>
+          <td><a class="button" href="{{ url_for('budget_quote_pdf', budget_id=budget.id) }}">PDF</a></td>
+          <td>
+            <form method="post" action="{{ url_for('delete_budget', budget_id=budget.id) }}" onsubmit="return confirm('Eliminar este presupuesto? Esta accion no se puede deshacer.');">
+              <button class="button danger">Eliminar</button>
+            </form>
+          </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="8">No hay presupuestos todavia.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
 </div>
 {% endblock %}

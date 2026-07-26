@@ -21,22 +21,24 @@
   <button class="button primary">Agregar</button>
 </form>
 <div class="panel">
-  <table>
-    <thead><tr><th>Tipo</th><th>Descripcion</th><th>Materiales</th><th>Mano de obra</th><th>Margen sobre material</th><th></th></tr></thead>
-    <tbody>
-      {% for item in furniture %}
-      <tr>
-        <td>{{ item.name }}</td>
-        <td>{{ item.description }}</td>
-        <td>{{ item.item_count }}</td>
-        <td>{{ item.labor_cost|money }}</td>
-        <td>{{ item.margin_pct }}%</td>
-        <td><a class="button" href="{{ url_for('furniture_detail', furniture_id=item.id) }}">Materiales y presupuesto</a></td>
-      </tr>
-      {% else %}
-      <tr><td colspan="6">Agrega el primer tipo de mueble para empezar a presupuestar.</td></tr>
-      {% endfor %}
-    </tbody>
-  </table>
+  <div class="table-scroll">
+    <table>
+      <thead><tr><th>Tipo</th><th>Descripcion</th><th>Materiales</th><th>Mano de obra</th><th>Margen sobre material</th><th></th></tr></thead>
+      <tbody>
+        {% for item in furniture %}
+        <tr>
+          <td>{{ item.name }}</td>
+          <td>{{ item.description }}</td>
+          <td>{{ item.item_count }}</td>
+          <td>{{ item.labor_cost|money }}</td>
+          <td>{{ item.margin_pct }}%</td>
+          <td><a class="button" href="{{ url_for('furniture_detail', furniture_id=item.id) }}">Materiales y presupuesto</a></td>
+        </tr>
+        {% else %}
+        <tr><td colspan="6">Agrega el primer tipo de mueble para empezar a presupuestar.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
 </div>
 {% endblock %}
