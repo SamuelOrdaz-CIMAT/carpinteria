@@ -44,6 +44,8 @@ CREATE TABLE IF NOT EXISTS furniture_types (
     width_m REAL NOT NULL DEFAULT 0,
     height_m REAL NOT NULL DEFAULT 0,
     depth_m REAL NOT NULL DEFAULT 0,
+    labor_days REAL NOT NULL DEFAULT 1,
+    day_rate REAL NOT NULL DEFAULT 1000,
     labor_cost REAL NOT NULL DEFAULT 0,
     margin_pct REAL NOT NULL DEFAULT 30,
     active INTEGER NOT NULL DEFAULT 1
@@ -122,6 +124,8 @@ def initialize() -> None:
         ensure_column(conn, "furniture_types", "width_m", "REAL NOT NULL DEFAULT 0")
         ensure_column(conn, "furniture_types", "height_m", "REAL NOT NULL DEFAULT 0")
         ensure_column(conn, "furniture_types", "depth_m", "REAL NOT NULL DEFAULT 0")
+        ensure_column(conn, "furniture_types", "labor_days", "REAL NOT NULL DEFAULT 1")
+        ensure_column(conn, "furniture_types", "day_rate", "REAL NOT NULL DEFAULT 1000")
         ensure_column(conn, "furniture_items", "calc_method", "TEXT NOT NULL DEFAULT 'fixed'")
         ensure_column(conn, "budgets", "width_m", "REAL NOT NULL DEFAULT 0")
         ensure_column(conn, "budgets", "height_m", "REAL NOT NULL DEFAULT 0")

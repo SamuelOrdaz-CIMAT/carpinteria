@@ -6,9 +6,6 @@ from carpinteria.services.pdf import build_catalog_pdf, build_furniture_quote_pd
 from carpinteria.services.pricing import cheapest_supplier_labels
 
 
-CATALOG_DAY_RATE = 1000
-
-
 def catalog_entries(conn):
     entries = []
     furniture_rows = conn.execute(
@@ -30,7 +27,7 @@ def catalog_entries(conn):
         lines = estimate_furniture(conn, items, 1)
         material_total = sum(line["total"] for line in lines)
         material_margin_price = material_total * 2
-        time_price = material_total + CATALOG_DAY_RATE
+        time_price = material_total + (float(furniture_row["labor_days"] or 0) * float(furniture_row["day_rate"] or 0))
         entries.append(
             {
                 "id": furniture_row["id"],
@@ -54,8 +51,8 @@ def register(app):
                 conn.execute(
                     """
                     INSERT OR IGNORE INTO furniture_types
-                    (name, description, width_m, height_m, depth_m, labor_cost, margin_pct)
-                    VALUES (?, ?, ?, ?, ?, ?, ?)
+                    (name, description, width_m, height_m, depth_m, labor_days, day_rate, labor_cost, margin_pct)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
                     """,
                     (
                         request.form.get("name", "").strip(),
@@ -63,6 +60,8 @@ def register(app):
                         float(request.form.get("width_m") or 0),
                         float(request.form.get("height_m") or 0),
                         float(request.form.get("depth_m") or 0),
+                        1,
+                        1000,
                         0,
                         100,
                     ),
@@ -186,7 +185,8 @@ def register(app):
             conn.execute(
                 """
                 UPDATE furniture_types
-                SET name = ?, description = ?, width_m = ?, height_m = ?, depth_m = ?
+                SET name = ?, description = ?, width_m = ?, height_m = ?, depth_m = ?,
+                    labor_days = ?, day_rate = ?
                 WHERE id = ?
                 """,
                 (
@@ -195,6 +195,8 @@ def register(app):
                     float(request.form.get("width_m") or 0),
                     float(request.form.get("height_m") or 0),
                     float(request.form.get("depth_m") or 0),
+                    float(request.form.get("labor_days") or 1),
+                    float(request.form.get("day_rate") or 1000),
                     furniture_id,
                 ),
             )

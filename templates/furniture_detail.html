@@ -34,6 +34,17 @@
         <input name="depth_m" type="number" step="0.001" min="0" value="{{ furniture.depth_m }}" placeholder="Ej. 0.60">
       </label>
     </div>
+    <div class="measure-grid">
+      <label>Dias de trabajo
+        <input name="labor_days" type="number" step="0.5" min="0" value="{{ furniture.labor_days }}" placeholder="Ej. 1">
+      </label>
+      <label>Pago por dia
+        <select name="day_rate">
+          <option value="1000" {% if furniture.day_rate == 1000 %}selected{% endif %}>$1,000 por dia</option>
+          <option value="1500" {% if furniture.day_rate == 1500 %}selected{% endif %}>$1,500 por dia</option>
+        </select>
+      </label>
+    </div>
     <button class="button primary">Guardar datos</button>
   </form>
 
@@ -199,19 +210,25 @@
   </div>
 </div>
 
-<section class="estimate-options" data-material-total="{{ material_total }}">
+<form class="estimate-save-form" method="post" action="{{ url_for('update_furniture', furniture_id=furniture.id) }}">
+  <input type="hidden" name="name" value="{{ furniture.name }}">
+  <input type="hidden" name="description" value="{{ furniture.description }}">
+  <input type="hidden" name="width_m" value="{{ furniture.width_m }}">
+  <input type="hidden" name="height_m" value="{{ furniture.height_m }}">
+  <input type="hidden" name="depth_m" value="{{ furniture.depth_m }}">
+  <section class="estimate-options" data-material-total="{{ material_total }}">
   <div class="estimate-card">
     <p class="eyebrow">Estimacion 1</p>
     <h2>Por tiempo de trabajo</h2>
     <p class="section-note">Aqui no se suma margen sobre material. Solo materiales mas mano de obra por dias.</p>
     <div class="estimate-controls">
       <label>Dias de trabajo
-        <input id="labor-days" type="number" step="0.5" min="0" value="1">
+        <input id="labor-days" name="labor_days" type="number" step="0.5" min="0" value="{{ furniture.labor_days }}">
       </label>
       <label>Pago por dia
-        <select id="day-rate">
-          <option value="1000">$1,000 por dia</option>
-          <option value="1500">$1,500 por dia</option>
+        <select id="day-rate" name="day_rate">
+          <option value="1000" {% if furniture.day_rate == 1000 %}selected{% endif %}>$1,000 por dia</option>
+          <option value="1500" {% if furniture.day_rate == 1500 %}selected{% endif %}>$1,500 por dia</option>
         </select>
       </label>
     </div>
@@ -241,7 +258,11 @@
       <div class="grand"><span>Usar este precio</span><strong id="recommended-total">$0.00</strong></div>
     </div>
   </div>
-</section>
+  </section>
+  <div class="form-actions">
+    <button class="button primary">Guardar dias y pago por dia</button>
+  </div>
+</form>
 <script>
   const estimateOptions = document.querySelector(".estimate-options");
   const materialTotal = estimateOptions ? Number(estimateOptions.dataset.materialTotal || 0) : 0;
