@@ -49,38 +49,70 @@
 </section>
 
 <div class="panel">
-  <h2>Agregar material necesario</h2>
-  <form class="toolbar material-form" method="post">
-    <label>Material
-      <select class="material-picker" name="material_id" required>
-        {% for material in materials %}
-          <option value="{{ material.id }}" data-cheapest="{{ cheapest_labels.get(material.id, 'Mas barato: sin precio capturado') }}">{{ material.name }} ({{ material.unit }})</option>
-        {% endfor %}
-      </select>
-      <span class="field-help">Elige el insumo que se ocupa para una pieza.</span>
-    </label>
-    <label>Cantidad por mueble
-      <input name="quantity" type="number" step="0.001" min="0" value="1" placeholder="Ej. 2">
-      <span class="field-help">Cantidad antes de merma. Ej. 2 tablas o 0.5 litros.</span>
-    </label>
-    <label>Merma %
-      <input name="waste_pct" type="number" step="0.01" min="0" value="0" placeholder="Ej. 10">
-      <span class="field-help">Extra por cortes, desperdicio o ajuste.</span>
-    </label>
-    <label>Donde comprar
-      <select class="supplier-picker" name="preferred_supplier_id">
-        {% set first_material = materials[0] if materials else none %}
-        <option value="">{{ cheapest_labels.get(first_material.id, "Mas barato: sin precio capturado") if first_material else "Mas barato: sin precio capturado" }}</option>
-        {% for supplier in suppliers %}<option value="{{ supplier.id }}">{{ supplier.name }}</option>{% endfor %}
-      </select>
-      <span class="field-help">Puedes fijar proveedor o dejar que busque el menor precio.</span>
-    </label>
-    <label>Notas del material
-      <input name="notes" placeholder="Ej. Color nogal, bisagra suave">
-      <span class="field-help">Especificacion que no se debe olvidar al comprar.</span>
-    </label>
-    <button class="button primary">Agregar</button>
+  <div class="panel-heading">
+    <div>
+      <h2>Agregar materiales necesarios</h2>
+      <p class="section-note">Captura todas las filas que necesites. Las filas sin material se ignoran al guardar.</p>
+    </div>
+    <button class="button" type="button" id="add-material-row">Agregar fila</button>
+  </div>
+  <form method="post">
+    <div class="table-scroll">
+      <table class="bulk-material-table">
+        <thead><tr><th>Material</th><th>Cantidad por mueble</th><th>Merma %</th><th>Comprar en</th><th>Notas</th><th>Quitar</th></tr></thead>
+        <tbody id="bulk-material-rows">
+          {% for _ in range(3) %}
+          <tr>
+            <td>
+              <select class="table-input material-select material-picker" name="material_id" aria-label="Material">
+                <option value="">Elige material</option>
+                {% for material in materials %}
+                  <option value="{{ material.id }}" data-cheapest="{{ cheapest_labels.get(material.id, 'Mas barato: sin precio capturado') }}">{{ material.name }} ({{ material.unit }})</option>
+                {% endfor %}
+              </select>
+            </td>
+            <td><input class="table-input number-input" name="quantity" type="number" step="0.001" min="0" placeholder="Ej. 2" aria-label="Cantidad por mueble"></td>
+            <td><input class="table-input number-input" name="waste_pct" type="number" step="0.01" min="0" value="0" aria-label="Merma"></td>
+            <td>
+              <select class="table-input supplier-select supplier-picker" name="preferred_supplier_id" aria-label="Donde comprar">
+                <option value="">Mas barato: elige material</option>
+                {% for supplier in suppliers %}<option value="{{ supplier.id }}">{{ supplier.name }}</option>{% endfor %}
+              </select>
+            </td>
+            <td><input class="table-input notes-input" name="notes" placeholder="Ej. Color nogal" aria-label="Notas del material"></td>
+            <td><button class="button danger row-remove" type="button">Quitar</button></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <div class="form-actions split-actions">
+      <button class="button" type="button" id="add-material-row-bottom">Agregar fila</button>
+      <button class="button primary">Guardar materiales</button>
+    </div>
   </form>
+  <template id="bulk-material-row-template">
+    <tr>
+      <td>
+        <select class="table-input material-select material-picker" name="material_id" aria-label="Material">
+          <option value="">Elige material</option>
+          {% for material in materials %}
+            <option value="{{ material.id }}" data-cheapest="{{ cheapest_labels.get(material.id, 'Mas barato: sin precio capturado') }}">{{ material.name }} ({{ material.unit }})</option>
+          {% endfor %}
+        </select>
+      </td>
+      <td><input class="table-input number-input" name="quantity" type="number" step="0.001" min="0" placeholder="Ej. 2" aria-label="Cantidad por mueble"></td>
+      <td><input class="table-input number-input" name="waste_pct" type="number" step="0.01" min="0" value="0" aria-label="Merma"></td>
+      <td>
+        <select class="table-input supplier-select supplier-picker" name="preferred_supplier_id" aria-label="Donde comprar">
+          <option value="">Mas barato: elige material</option>
+          {% for supplier in suppliers %}<option value="{{ supplier.id }}">{{ supplier.name }}</option>{% endfor %}
+        </select>
+      </td>
+      <td><input class="table-input notes-input" name="notes" placeholder="Ej. Color nogal" aria-label="Notas del material"></td>
+      <td><button class="button danger row-remove" type="button">Quitar</button></td>
+    </tr>
+  </template>
 </div>
 
 <div class="panel">
@@ -194,20 +226,42 @@
   dayRateSelect?.addEventListener("change", refreshTimeEstimate);
   refreshTimeEstimate();
 
-  document.querySelectorAll(".material-picker").forEach((materialSelect) => {
-    const container = materialSelect.closest("form") || materialSelect.closest("tr");
+  function bindMaterialPicker(materialSelect) {
+    const container = materialSelect.closest("tr") || materialSelect.closest("form");
     const supplierSelect = container ? container.querySelector(".supplier-picker") : null;
     const automaticOption = supplierSelect ? supplierSelect.querySelector('option[value=""]') : null;
 
     function refreshCheapestLabel() {
       const selected = materialSelect.options[materialSelect.selectedIndex];
       if (automaticOption && selected) {
-        automaticOption.textContent = selected.dataset.cheapest || "Mas barato: sin precio capturado";
+        automaticOption.textContent = selected.value ? (selected.dataset.cheapest || "Mas barato: sin precio capturado") : "Mas barato: elige material";
       }
     }
 
     refreshCheapestLabel();
     materialSelect.addEventListener("change", refreshCheapestLabel);
-  });
+  }
+
+  function bindBulkRow(row) {
+    row.querySelectorAll(".row-remove").forEach((button) => {
+      button.addEventListener("click", () => row.remove());
+    });
+  }
+
+  document.querySelectorAll(".material-picker").forEach(bindMaterialPicker);
+  document.querySelectorAll("#bulk-material-rows tr").forEach(bindBulkRow);
+
+  function addBulkMaterialRow() {
+    const template = document.getElementById("bulk-material-row-template");
+    const tbody = document.getElementById("bulk-material-rows");
+    if (!template || !tbody) return;
+    const row = template.content.firstElementChild.cloneNode(true);
+    tbody.appendChild(row);
+    row.querySelectorAll(".material-picker").forEach(bindMaterialPicker);
+    bindBulkRow(row);
+  }
+
+  document.getElementById("add-material-row")?.addEventListener("click", addBulkMaterialRow);
+  document.getElementById("add-material-row-bottom")?.addEventListener("click", addBulkMaterialRow);
 </script>
 {% endblock %}

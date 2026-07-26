@@ -42,22 +42,37 @@ def register(app):
             if not furniture_row:
                 abort(404)
             if request.method == "POST":
-                conn.execute(
-                    """
-                    INSERT INTO furniture_items
-                    (furniture_type_id, material_id, quantity, waste_pct, preferred_supplier_id, notes)
-                    VALUES (?, ?, ?, ?, ?, ?)
-                    """,
-                    (
-                        furniture_id,
-                        int(request.form["material_id"]),
-                        float(request.form.get("quantity") or 1),
-                        float(request.form.get("waste_pct") or 0),
-                        int(request.form["preferred_supplier_id"]) if request.form.get("preferred_supplier_id") else None,
-                        request.form.get("notes", "").strip(),
-                    ),
-                )
-                flash("Material agregado al mueble.")
+                inserted = 0
+                material_ids = request.form.getlist("material_id")
+                quantities = request.form.getlist("quantity")
+                waste_values = request.form.getlist("waste_pct")
+                supplier_ids = request.form.getlist("preferred_supplier_id")
+                notes_values = request.form.getlist("notes")
+
+                for index, material_id in enumerate(material_ids):
+                    if not material_id:
+                        continue
+                    quantity = quantities[index] if index < len(quantities) else ""
+                    waste_pct = waste_values[index] if index < len(waste_values) else ""
+                    preferred_supplier_id = supplier_ids[index] if index < len(supplier_ids) else ""
+                    notes = notes_values[index] if index < len(notes_values) else ""
+                    conn.execute(
+                        """
+                        INSERT INTO furniture_items
+                        (furniture_type_id, material_id, quantity, waste_pct, preferred_supplier_id, notes)
+                        VALUES (?, ?, ?, ?, ?, ?)
+                        """,
+                        (
+                            furniture_id,
+                            int(material_id),
+                            float(quantity or 1),
+                            float(waste_pct or 0),
+                            int(preferred_supplier_id) if preferred_supplier_id else None,
+                            notes.strip(),
+                        ),
+                    )
+                    inserted += 1
+                flash(f"{inserted} material(es) agregado(s) al mueble." if inserted else "No se agregaron materiales.")
                 return redirect(url_for("furniture_detail", furniture_id=furniture_id))
 
             items = conn.execute(

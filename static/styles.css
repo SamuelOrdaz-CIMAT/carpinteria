@@ -286,7 +286,12 @@ label {
 .form-actions {
   display: flex;
   justify-content: flex-end;
+  gap: 10px;
   margin-top: 14px;
+}
+
+.form-actions.split-actions {
+  justify-content: space-between;
 }
 
 .stacked-form {
@@ -341,6 +346,10 @@ label {
 .material-form {
   grid-template-columns: minmax(190px, 2fr) repeat(3, minmax(120px, 1fr)) minmax(140px, 1fr) auto;
   margin-bottom: 0;
+}
+
+.bulk-material-table {
+  min-width: 880px;
 }
 
 .button {
@@ -609,6 +618,10 @@ td.strong {
   .form-actions .button,
   .toolbar .button {
     width: 100%;
+  }
+
+  .form-actions.split-actions {
+    flex-direction: column;
   }
 
   .panel {
