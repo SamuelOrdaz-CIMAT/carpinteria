@@ -8,11 +8,32 @@ from carpinteria.services.pricing import best_price
 from carpinteria.utils import money
 
 
+def furniture_measurements(furniture) -> dict:
+    width = float(furniture["width_m"] or 0)
+    height = float(furniture["height_m"] or 0)
+    depth = float(furniture["depth_m"] or 0)
+    return {
+        "fixed": 1,
+        "area_front": width * height,
+        "area_side": depth * height,
+        "area_top": width * depth,
+        "linear_width": width,
+        "linear_height": height,
+        "linear_depth": depth,
+    }
+
+
+def calculated_quantity(item, furniture, furniture_qty: float) -> float:
+    method = item["calc_method"] if "calc_method" in item.keys() else "fixed"
+    base = furniture_measurements(furniture).get(method, 1)
+    return furniture_qty * item["quantity"] * base
+
+
 def estimate_furniture(conn: sqlite3.Connection, items, furniture_qty: float) -> list[dict]:
     lines = []
     for item in items:
         unit_price, supplier_name = best_price(conn, item["material_id"], item["preferred_supplier_id"])
-        line_qty = furniture_qty * item["quantity"]
+        line_qty = calculated_quantity(item, item, furniture_qty)
         lines.append(
             {
                 "material_name": item["material_name"],
@@ -33,9 +54,11 @@ def furniture_quote_data(conn: sqlite3.Connection, furniture_id: int):
         abort(404)
     items = conn.execute(
         """
-        SELECT fi.*, m.name AS material_name, m.unit
+        SELECT fi.*, m.name AS material_name, m.unit,
+               ft.width_m, ft.height_m, ft.depth_m
         FROM furniture_items fi
         JOIN materials m ON m.id = fi.material_id
+        JOIN furniture_types ft ON ft.id = fi.furniture_type_id
         WHERE fi.furniture_type_id = ?
         ORDER BY fi.id
         """,
@@ -80,9 +103,11 @@ def replace_budget_lines(conn: sqlite3.Connection, budget_id: int, furniture_id:
     conn.execute("DELETE FROM budget_lines WHERE budget_id = ?", (budget_id,))
     items = conn.execute(
         """
-        SELECT fi.*, m.name AS material_name, m.unit
+        SELECT fi.*, m.name AS material_name, m.unit,
+               ft.width_m, ft.height_m, ft.depth_m
         FROM furniture_items fi
         JOIN materials m ON m.id = fi.material_id
+        JOIN furniture_types ft ON ft.id = fi.furniture_type_id
         WHERE fi.furniture_type_id = ?
         ORDER BY fi.id
         """,

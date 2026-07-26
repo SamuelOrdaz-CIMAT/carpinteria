@@ -41,6 +41,9 @@ CREATE TABLE IF NOT EXISTS furniture_types (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT NOT NULL UNIQUE,
     description TEXT DEFAULT '',
+    width_m REAL NOT NULL DEFAULT 0,
+    height_m REAL NOT NULL DEFAULT 0,
+    depth_m REAL NOT NULL DEFAULT 0,
     labor_cost REAL NOT NULL DEFAULT 0,
     margin_pct REAL NOT NULL DEFAULT 30,
     active INTEGER NOT NULL DEFAULT 1
@@ -51,6 +54,7 @@ CREATE TABLE IF NOT EXISTS furniture_items (
     furniture_type_id INTEGER NOT NULL,
     material_id INTEGER NOT NULL,
     quantity REAL NOT NULL DEFAULT 1,
+    calc_method TEXT NOT NULL DEFAULT 'fixed',
     waste_pct REAL NOT NULL DEFAULT 0,
     preferred_supplier_id INTEGER,
     notes TEXT DEFAULT '',
@@ -112,11 +116,21 @@ def db() -> sqlite3.Connection:
 def initialize() -> None:
     with db() as conn:
         conn.executescript(SCHEMA)
+        ensure_column(conn, "furniture_types", "width_m", "REAL NOT NULL DEFAULT 0")
+        ensure_column(conn, "furniture_types", "height_m", "REAL NOT NULL DEFAULT 0")
+        ensure_column(conn, "furniture_types", "depth_m", "REAL NOT NULL DEFAULT 0")
+        ensure_column(conn, "furniture_items", "calc_method", "TEXT NOT NULL DEFAULT 'fixed'")
         for key, value in DEFAULT_SETTINGS.items():
             conn.execute("INSERT OR IGNORE INTO settings (key, value) VALUES (?, ?)", (key, value))
         material_count = conn.execute("SELECT COUNT(*) FROM materials").fetchone()[0]
     if material_count == 0 and SOURCE_XLSX.exists() and openpyxl:
         import_prices_from_excel(SOURCE_XLSX)
+
+
+def ensure_column(conn: sqlite3.Connection, table: str, column: str, definition: str) -> None:
+    columns = {row["name"] for row in conn.execute(f"PRAGMA table_info({table})").fetchall()}
+    if column not in columns:
+        conn.execute(f"ALTER TABLE {table} ADD COLUMN {column} {definition}")
 
 
 def get_settings(conn: sqlite3.Connection) -> dict:

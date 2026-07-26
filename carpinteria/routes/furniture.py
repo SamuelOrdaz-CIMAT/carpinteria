@@ -17,9 +17,11 @@ def catalog_entries(conn):
     for furniture_row in furniture_rows:
         items = conn.execute(
             """
-            SELECT fi.*, m.name AS material_name, m.unit
+            SELECT fi.*, m.name AS material_name, m.unit,
+                   ft.width_m, ft.height_m, ft.depth_m
             FROM furniture_items fi
             JOIN materials m ON m.id = fi.material_id
+            JOIN furniture_types ft ON ft.id = fi.furniture_type_id
             WHERE fi.furniture_type_id = ?
             ORDER BY fi.id
             """,
@@ -50,10 +52,17 @@ def register(app):
         with db() as conn:
             if request.method == "POST":
                 conn.execute(
-                    "INSERT OR IGNORE INTO furniture_types (name, description, labor_cost, margin_pct) VALUES (?, ?, ?, ?)",
+                    """
+                    INSERT OR IGNORE INTO furniture_types
+                    (name, description, width_m, height_m, depth_m, labor_cost, margin_pct)
+                    VALUES (?, ?, ?, ?, ?, ?, ?)
+                    """,
                     (
                         request.form.get("name", "").strip(),
                         request.form.get("description", "").strip(),
+                        float(request.form.get("width_m") or 0),
+                        float(request.form.get("height_m") or 0),
+                        float(request.form.get("depth_m") or 0),
                         0,
                         100,
                     ),
@@ -104,6 +113,7 @@ def register(app):
                 inserted = 0
                 material_ids = request.form.getlist("material_id")
                 quantities = request.form.getlist("quantity")
+                calc_methods = request.form.getlist("calc_method")
                 supplier_ids = request.form.getlist("preferred_supplier_id")
                 notes_values = request.form.getlist("notes")
 
@@ -111,18 +121,20 @@ def register(app):
                     if not material_id:
                         continue
                     quantity = quantities[index] if index < len(quantities) else ""
+                    calc_method = calc_methods[index] if index < len(calc_methods) else "fixed"
                     preferred_supplier_id = supplier_ids[index] if index < len(supplier_ids) else ""
                     notes = notes_values[index] if index < len(notes_values) else ""
                     conn.execute(
                         """
                         INSERT INTO furniture_items
-                        (furniture_type_id, material_id, quantity, waste_pct, preferred_supplier_id, notes)
-                        VALUES (?, ?, ?, ?, ?, ?)
+                        (furniture_type_id, material_id, quantity, calc_method, waste_pct, preferred_supplier_id, notes)
+                        VALUES (?, ?, ?, ?, ?, ?, ?)
                         """,
                         (
                             furniture_id,
                             int(material_id),
                             float(quantity or 1),
+                            calc_method or "fixed",
                             0,
                             int(preferred_supplier_id) if preferred_supplier_id else None,
                             notes.strip(),
@@ -134,9 +146,11 @@ def register(app):
 
             items = conn.execute(
                 """
-                SELECT fi.*, m.name AS material_name, m.unit, s.name AS supplier_name
+                SELECT fi.*, m.name AS material_name, m.unit, s.name AS supplier_name,
+                       ft.width_m, ft.height_m, ft.depth_m
                 FROM furniture_items fi
                 JOIN materials m ON m.id = fi.material_id
+                JOIN furniture_types ft ON ft.id = fi.furniture_type_id
                 LEFT JOIN suppliers s ON s.id = fi.preferred_supplier_id
                 WHERE fi.furniture_type_id = ?
                 ORDER BY fi.id
@@ -172,12 +186,15 @@ def register(app):
             conn.execute(
                 """
                 UPDATE furniture_types
-                SET name = ?, description = ?
+                SET name = ?, description = ?, width_m = ?, height_m = ?, depth_m = ?
                 WHERE id = ?
                 """,
                 (
                     request.form.get("name", "").strip(),
                     request.form.get("description", "").strip(),
+                    float(request.form.get("width_m") or 0),
+                    float(request.form.get("height_m") or 0),
+                    float(request.form.get("depth_m") or 0),
                     furniture_id,
                 ),
             )
@@ -205,12 +222,13 @@ def register(app):
             conn.execute(
                 """
                 UPDATE furniture_items
-                SET material_id = ?, quantity = ?, waste_pct = 0, preferred_supplier_id = ?, notes = ?
+                SET material_id = ?, quantity = ?, calc_method = ?, waste_pct = 0, preferred_supplier_id = ?, notes = ?
                 WHERE id = ?
                 """,
                 (
                     int(request.form["material_id"]),
                     float(request.form.get("quantity") or 1),
+                    request.form.get("calc_method") or "fixed",
                     int(request.form["preferred_supplier_id"]) if request.form.get("preferred_supplier_id") else None,
                     request.form.get("notes", "").strip(),
                     item_id,

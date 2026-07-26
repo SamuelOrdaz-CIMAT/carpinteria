@@ -23,6 +23,17 @@
       <input name="description" value="{{ furniture.description }}" placeholder="Ej. 2.40 m x 1.80 m, acabado natural">
       <span class="field-help">Sirve para identificar el modelo sin abrir el presupuesto.</span>
     </label>
+    <div class="measure-grid">
+      <label>Ancho m
+        <input name="width_m" type="number" step="0.001" min="0" value="{{ furniture.width_m }}" placeholder="Ej. 1.20">
+      </label>
+      <label>Alto m
+        <input name="height_m" type="number" step="0.001" min="0" value="{{ furniture.height_m }}" placeholder="Ej. 2.10">
+      </label>
+      <label>Fondo m
+        <input name="depth_m" type="number" step="0.001" min="0" value="{{ furniture.depth_m }}" placeholder="Ej. 0.60">
+      </label>
+    </div>
     <button class="button primary">Guardar datos</button>
   </form>
 
@@ -59,7 +70,7 @@
   <form method="post">
     <div class="table-scroll">
       <table class="bulk-material-table">
-        <thead><tr><th>Material</th><th>Cantidad por mueble</th><th>Comprar en</th><th>Notas</th><th>Quitar</th></tr></thead>
+        <thead><tr><th>Material</th><th>Cantidad/factor</th><th>Como se calcula</th><th>Comprar en</th><th>Notas</th><th>Quitar</th></tr></thead>
         <tbody id="bulk-material-rows">
           {% for _ in range(3) %}
           <tr>
@@ -71,7 +82,18 @@
                 {% endfor %}
               </select>
             </td>
-            <td><input class="table-input number-input" name="quantity" type="number" step="0.001" min="0" placeholder="Ej. 2" aria-label="Cantidad por mueble"></td>
+            <td><input class="table-input number-input" name="quantity" type="number" step="0.001" min="0" placeholder="Ej. 2" aria-label="Cantidad o factor"></td>
+            <td>
+              <select class="table-input calc-select" name="calc_method" aria-label="Como se calcula">
+                <option value="fixed">Cantidad fija</option>
+                <option value="area_front">m2 frente: ancho x alto</option>
+                <option value="area_side">m2 lateral: fondo x alto</option>
+                <option value="area_top">m2 cubierta: ancho x fondo</option>
+                <option value="linear_width">Metro lineal: ancho</option>
+                <option value="linear_height">Metro lineal: alto</option>
+                <option value="linear_depth">Metro lineal: fondo</option>
+              </select>
+            </td>
             <td>
               <select class="table-input supplier-select supplier-picker" name="preferred_supplier_id" aria-label="Donde comprar">
                 <option value="">Mas barato: elige material</option>
@@ -100,7 +122,18 @@
           {% endfor %}
         </select>
       </td>
-      <td><input class="table-input number-input" name="quantity" type="number" step="0.001" min="0" placeholder="Ej. 2" aria-label="Cantidad por mueble"></td>
+      <td><input class="table-input number-input" name="quantity" type="number" step="0.001" min="0" placeholder="Ej. 2" aria-label="Cantidad o factor"></td>
+      <td>
+        <select class="table-input calc-select" name="calc_method" aria-label="Como se calcula">
+          <option value="fixed">Cantidad fija</option>
+          <option value="area_front">m2 frente: ancho x alto</option>
+          <option value="area_side">m2 lateral: fondo x alto</option>
+          <option value="area_top">m2 cubierta: ancho x fondo</option>
+          <option value="linear_width">Metro lineal: ancho</option>
+          <option value="linear_height">Metro lineal: alto</option>
+          <option value="linear_depth">Metro lineal: fondo</option>
+        </select>
+      </td>
       <td>
         <select class="table-input supplier-select supplier-picker" name="preferred_supplier_id" aria-label="Donde comprar">
           <option value="">Mas barato: elige material</option>
@@ -120,7 +153,7 @@
   </div>
   <div class="table-scroll">
     <table>
-      <thead><tr><th>Material</th><th>Cantidad por mueble</th><th>Comprar en</th><th>Precio usado</th><th>Total</th><th>Notas</th><th>Modificar</th><th>Quitar</th></tr></thead>
+      <thead><tr><th>Material</th><th>Cantidad/factor</th><th>Como se calcula</th><th>Comprar en</th><th>Precio usado</th><th>Total</th><th>Notas</th><th>Modificar</th><th>Quitar</th></tr></thead>
       <tbody>
         {% for item in items %}
         {% set estimate = estimate_lines[loop.index0] %}
@@ -134,7 +167,18 @@
               </select>
             </td>
             <td>
-              <input class="table-input number-input" name="quantity" type="number" step="0.001" min="0" value="{{ item.quantity }}" aria-label="Cantidad por mueble">
+              <input class="table-input number-input" name="quantity" type="number" step="0.001" min="0" value="{{ item.quantity }}" aria-label="Cantidad o factor">
+            </td>
+            <td>
+              <select class="table-input calc-select" name="calc_method" aria-label="Como se calcula">
+                <option value="fixed" {% if item.calc_method == "fixed" %}selected{% endif %}>Cantidad fija</option>
+                <option value="area_front" {% if item.calc_method == "area_front" %}selected{% endif %}>m2 frente: ancho x alto</option>
+                <option value="area_side" {% if item.calc_method == "area_side" %}selected{% endif %}>m2 lateral: fondo x alto</option>
+                <option value="area_top" {% if item.calc_method == "area_top" %}selected{% endif %}>m2 cubierta: ancho x fondo</option>
+                <option value="linear_width" {% if item.calc_method == "linear_width" %}selected{% endif %}>Metro lineal: ancho</option>
+                <option value="linear_height" {% if item.calc_method == "linear_height" %}selected{% endif %}>Metro lineal: alto</option>
+                <option value="linear_depth" {% if item.calc_method == "linear_depth" %}selected{% endif %}>Metro lineal: fondo</option>
+              </select>
             </td>
             <td>
               <select class="table-input supplier-select supplier-picker" name="preferred_supplier_id" aria-label="Donde comprar">
@@ -158,7 +202,7 @@
           </td>
         </tr>
         {% else %}
-        <tr><td colspan="8">Aun no tiene materiales asignados.</td></tr>
+        <tr><td colspan="9">Aun no tiene materiales asignados.</td></tr>
         {% endfor %}
       </tbody>
     </table>

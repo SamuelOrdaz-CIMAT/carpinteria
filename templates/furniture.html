@@ -17,22 +17,35 @@
     <input name="description" placeholder="Ej. Closet de melamina con 2 puertas">
     <span class="field-help">Medidas, acabado o detalle rapido para reconocerlo.</span>
   </label>
+  <label>Ancho m
+    <input name="width_m" type="number" step="0.001" min="0" placeholder="Ej. 1.20">
+    <span class="field-help">Ancho frontal del mueble en metros.</span>
+  </label>
+  <label>Alto m
+    <input name="height_m" type="number" step="0.001" min="0" placeholder="Ej. 2.10">
+    <span class="field-help">Altura del mueble en metros.</span>
+  </label>
+  <label>Fondo m
+    <input name="depth_m" type="number" step="0.001" min="0" placeholder="Ej. 0.60">
+    <span class="field-help">Profundidad del mueble en metros.</span>
+  </label>
   <button class="button primary">Agregar</button>
 </form>
 <div class="panel">
   <div class="table-scroll">
     <table>
-      <thead><tr><th>Tipo</th><th>Descripcion</th><th>Materiales</th><th></th></tr></thead>
+      <thead><tr><th>Tipo</th><th>Descripcion</th><th>Medidas</th><th>Materiales</th><th></th></tr></thead>
       <tbody>
         {% for item in furniture %}
         <tr>
           <td>{{ item.name }}</td>
           <td>{{ item.description }}</td>
+          <td>{{ item.width_m }} x {{ item.height_m }} x {{ item.depth_m }} m</td>
           <td>{{ item.item_count }}</td>
           <td><a class="button" href="{{ url_for('furniture_detail', furniture_id=item.id) }}">Materiales y presupuesto</a></td>
         </tr>
         {% else %}
-        <tr><td colspan="4">Agrega el primer tipo de mueble para empezar a presupuestar.</td></tr>
+        <tr><td colspan="5">Agrega el primer tipo de mueble para empezar a presupuestar.</td></tr>
         {% endfor %}
       </tbody>
     </table>
