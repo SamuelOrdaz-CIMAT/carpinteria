@@ -361,13 +361,15 @@
   }
 
   function addMaterialFromQuickPicker(materialId) {
+    const scrollX = window.scrollX;
+    const scrollY = window.scrollY;
     const row = firstAvailableBulkRow();
     const select = row?.querySelector(".material-picker");
     if (!select) return;
     select.value = materialId;
     select.dispatchEvent(new Event("change", { bubbles: true }));
-    row.querySelector("[name='quantity']")?.focus();
     setQuickPickerOpen(true);
+    window.scrollTo({ top: scrollY, left: scrollX, behavior: "auto" });
   }
 
   quickToggle?.addEventListener("click", () => {
