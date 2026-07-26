@@ -213,11 +213,11 @@ def build_catalog_pdf(entries, workshop=None) -> bytes:
 
     pdf.y = 646
     pdf.text(42, pdf.y, "Lista de precios", 18, True, c["ink"])
-    pdf.text(42, pdf.y - 20, "Precio recomendado: se usa el valor mas alto entre las dos estimaciones.", 10, False, c["muted"])
+    pdf.text(42, pdf.y - 20, "Catalogo general de muebles y precios finales.", 10, False, c["muted"])
     pdf.y -= 54
 
-    headers = ["Mueble", "Caracteristicas", "Materiales", "Precio recomendado"]
-    widths = [150, 220, 75, 95]
+    headers = ["Mueble", "Caracteristicas", "Precio"]
+    widths = [170, 270, 100]
     x0 = 42
     row_h = 32
     draw_table_header(pdf, x0, pdf.y, headers, widths, c)
@@ -226,8 +226,7 @@ def build_catalog_pdf(entries, workshop=None) -> bytes:
         pdf.ensure_space(row_h + 80)
         values = [
             fit_text(item["name"], 24),
-            fit_text(item["description"] or "-", 38),
-            str(item["material_count"]),
+            fit_text(item["description"] or "-", 48),
             money(item["price"]),
         ]
         draw_table_row(pdf, x0, pdf.y, values, widths, c)
