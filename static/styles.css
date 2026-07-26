@@ -460,6 +460,14 @@ label {
   outline: none;
 }
 
+.quick-material-option.selected {
+  border-color: var(--green-dark);
+  background: #e5f5ee;
+  color: var(--green-dark);
+  font-weight: 700;
+  box-shadow: inset 4px 0 0 var(--green);
+}
+
 .button {
   display: inline-flex;
   align-items: center;

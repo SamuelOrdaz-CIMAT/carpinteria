@@ -285,6 +285,7 @@
     refreshCheapestLabel();
     materialSelect.addEventListener("change", refreshCheapestLabel);
     materialSelect.addEventListener("change", () => ensureTrailingBulkRow(materialSelect));
+    materialSelect.addEventListener("change", refreshSelectedQuickMaterials);
   }
 
   function bindBulkRow(row) {
@@ -292,6 +293,7 @@
       button.addEventListener("click", () => {
         row.remove();
         ensureTrailingBulkRow();
+        refreshSelectedQuickMaterials();
       });
     });
   }
@@ -335,9 +337,27 @@
     }
   }
 
+  function selectedMaterialIds() {
+    return new Set(
+      bulkRows()
+        .map((row) => row.querySelector(".material-picker")?.value)
+        .filter(Boolean)
+    );
+  }
+
+  function refreshSelectedQuickMaterials() {
+    const selectedIds = selectedMaterialIds();
+    document.querySelectorAll(".quick-material-option").forEach((button) => {
+      const selected = selectedIds.has(button.dataset.materialId);
+      button.classList.toggle("selected", selected);
+      button.setAttribute("aria-pressed", selected ? "true" : "false");
+    });
+  }
+
   document.getElementById("add-material-row")?.addEventListener("click", addBulkMaterialRow);
   document.getElementById("add-material-row-bottom")?.addEventListener("click", addBulkMaterialRow);
   ensureTrailingBulkRow();
+  refreshSelectedQuickMaterials();
 
   const quickPicker = document.querySelector(".quick-material-picker");
   const quickMenu = quickPicker?.querySelector(".quick-material-menu");
@@ -363,6 +383,7 @@
     if (!select) return;
     select.value = materialId;
     select.dispatchEvent(new Event("change", { bubbles: true }));
+    refreshSelectedQuickMaterials();
     setQuickPickerOpen(true);
     window.scrollTo({ top: scrollY, left: scrollX, behavior: "auto" });
   }
