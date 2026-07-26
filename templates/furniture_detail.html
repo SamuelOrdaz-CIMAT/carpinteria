@@ -77,12 +77,10 @@
       <h2>Agregar materiales necesarios</h2>
       <p class="section-note">Captura todas las filas que necesites. Las filas sin material se ignoran al guardar.</p>
     </div>
-    <button class="button" type="button" id="add-material-row">Agregar fila</button>
   </div>
   <form method="post">
-    <div class="quick-material-picker" data-open="false">
-      <button class="button quick-material-toggle" type="button" aria-expanded="false">Elegir materiales</button>
-      <div class="quick-material-menu" hidden>
+    <div class="quick-material-picker">
+      <div class="quick-material-menu">
         <input class="quick-material-search" type="search" placeholder="Buscar material" aria-label="Buscar material">
         {% for material in materials %}
           <button
@@ -342,14 +340,11 @@
   ensureTrailingBulkRow();
 
   const quickPicker = document.querySelector(".quick-material-picker");
-  const quickToggle = quickPicker?.querySelector(".quick-material-toggle");
   const quickMenu = quickPicker?.querySelector(".quick-material-menu");
 
   function setQuickPickerOpen(open) {
-    if (!quickPicker || !quickToggle || !quickMenu) return;
+    if (!quickPicker || !quickMenu) return;
     quickPicker.dataset.open = open ? "true" : "false";
-    quickToggle.setAttribute("aria-expanded", open ? "true" : "false");
-    quickMenu.hidden = !open;
   }
 
   function firstAvailableBulkRow() {
@@ -371,10 +366,6 @@
     setQuickPickerOpen(true);
     window.scrollTo({ top: scrollY, left: scrollX, behavior: "auto" });
   }
-
-  quickToggle?.addEventListener("click", () => {
-    setQuickPickerOpen(quickPicker?.dataset.open !== "true");
-  });
 
   quickPicker?.querySelectorAll(".quick-material-option").forEach((button) => {
     button.addEventListener("click", () => addMaterialFromQuickPicker(button.dataset.materialId));
