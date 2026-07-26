@@ -557,7 +557,7 @@ td.strong {
 
 .estimate-options {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 16px;
   margin-top: 18px;
 }
@@ -575,6 +575,12 @@ td.strong {
 .estimate-card.material-margin {
   background: linear-gradient(180deg, #f1fbf6, #fffaf2);
   box-shadow: inset 0 4px 0 var(--green);
+}
+
+.estimate-card.recommended-estimate {
+  border-color: #8fc6b3;
+  background: linear-gradient(180deg, #ecfaf4, #fffaf2);
+  box-shadow: inset 0 4px 0 var(--green-dark);
 }
 
 .estimate-controls {

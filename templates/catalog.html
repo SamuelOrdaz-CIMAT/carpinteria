@@ -4,7 +4,7 @@
   <div>
     <p class="eyebrow">Lista de precios</p>
     <h1>Catalogo</h1>
-    <p class="muted">Precios finales de los muebles agregados, calculados con margen fijo del 100% sobre materiales.</p>
+    <p class="muted">Precios recomendados usando el valor mas alto entre las dos estimaciones.</p>
   </div>
   <a class="button primary" href="{{ url_for('catalog_pdf') }}">Descargar PDF</a>
 </section>
@@ -20,9 +20,11 @@
     <div class="catalog-meta">
       <span>{{ item.material_count }} material(es)</span>
       <span>Material base {{ item.material_total|money }}</span>
+      <span>Tiempo base {{ item.time_price|money }}</span>
+      <span>Material + 100% {{ item.material_margin_price|money }}</span>
     </div>
     <div class="catalog-price">
-      <span>Precio final</span>
+      <span>Precio recomendado</span>
       <strong>{{ item.price|money }}</strong>
     </div>
     <a class="button" href="{{ url_for('furniture_detail', furniture_id=item.id) }}">Ver mueble</a>

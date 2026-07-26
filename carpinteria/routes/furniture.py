@@ -6,6 +6,9 @@ from carpinteria.services.pdf import build_catalog_pdf, build_furniture_quote_pd
 from carpinteria.services.pricing import cheapest_supplier_labels
 
 
+HIGH_DAY_RATE = 1500
+
+
 def catalog_entries(conn):
     entries = []
     furniture_rows = conn.execute(
@@ -24,6 +27,8 @@ def catalog_entries(conn):
         ).fetchall()
         lines = estimate_furniture(conn, items, 1)
         material_total = sum(line["total"] for line in lines)
+        material_margin_price = material_total * 2
+        time_price = material_total + HIGH_DAY_RATE
         entries.append(
             {
                 "id": furniture_row["id"],
@@ -31,7 +36,9 @@ def catalog_entries(conn):
                 "description": furniture_row["description"],
                 "material_count": len(lines),
                 "material_total": material_total,
-                "price": material_total * 2,
+                "time_price": time_price,
+                "material_margin_price": material_margin_price,
+                "price": max(time_price, material_margin_price),
             }
         )
     return entries

@@ -213,10 +213,10 @@ def build_catalog_pdf(entries, workshop=None) -> bytes:
 
     pdf.y = 646
     pdf.text(42, pdf.y, "Lista de precios", 18, True, c["ink"])
-    pdf.text(42, pdf.y - 20, "Precios finales calculados con margen fijo del 100% sobre materiales.", 10, False, c["muted"])
+    pdf.text(42, pdf.y - 20, "Precio recomendado: se usa el valor mas alto entre las dos estimaciones.", 10, False, c["muted"])
     pdf.y -= 54
 
-    headers = ["Mueble", "Caracteristicas", "Materiales", "Precio final"]
+    headers = ["Mueble", "Caracteristicas", "Materiales", "Precio recomendado"]
     widths = [150, 220, 75, 95]
     x0 = 42
     row_h = 32

@@ -195,7 +195,16 @@
     <div class="estimate-lines">
       <div><span>Materiales</span><strong>{{ material_total|money }}</strong></div>
       <div><span>Margen fijo 100%</span><strong>{{ material_total|money }}</strong></div>
-      <div class="grand"><span>Total estimado</span><strong>{{ (material_total * 2)|money }}</strong></div>
+      <div class="grand"><span>Total estimado</span><strong id="material-margin-total">{{ (material_total * 2)|money }}</strong></div>
+    </div>
+  </div>
+
+  <div class="estimate-card recommended-estimate">
+    <p class="eyebrow">Precio recomendado</p>
+    <h2>Mayor de las dos estimaciones</h2>
+    <p class="section-note">Este es el precio que conviene tomar como referencia final.</p>
+    <div class="estimate-lines">
+      <div class="grand"><span>Usar este precio</span><strong id="recommended-total">$0.00</strong></div>
     </div>
   </div>
 </section>
@@ -207,14 +216,20 @@
   const dayRateSelect = document.getElementById("day-rate");
   const timeLaborTotal = document.getElementById("time-labor-total");
   const timeGrandTotal = document.getElementById("time-grand-total");
+  const recommendedTotal = document.getElementById("recommended-total");
+  const materialMarginTotal = materialTotal * 2;
 
   function refreshTimeEstimate() {
     if (!laborDaysInput || !dayRateSelect || !timeLaborTotal || !timeGrandTotal) return;
     const days = Number(laborDaysInput.value || 0);
     const dayRate = Number(dayRateSelect.value || 0);
     const laborTotal = days * dayRate;
+    const timeTotal = materialTotal + laborTotal;
     timeLaborTotal.textContent = moneyFormatter.format(laborTotal);
-    timeGrandTotal.textContent = moneyFormatter.format(materialTotal + laborTotal);
+    timeGrandTotal.textContent = moneyFormatter.format(timeTotal);
+    if (recommendedTotal) {
+      recommendedTotal.textContent = moneyFormatter.format(Math.max(timeTotal, materialMarginTotal));
+    }
   }
 
   laborDaysInput?.addEventListener("input", refreshTimeEstimate);
