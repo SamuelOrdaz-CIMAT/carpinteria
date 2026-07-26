@@ -43,8 +43,8 @@ def furniture_quote_data(conn: sqlite3.Connection, furniture_id: int):
     ).fetchall()
     lines = estimate_furniture(conn, items, 1)
     material_total = sum(line["total"] for line in lines)
-    subtotal = material_total + furniture_row["labor_cost"]
-    margin_amount = material_total * (furniture_row["margin_pct"] / 100)
+    subtotal = material_total
+    margin_amount = material_total
     grand_total = subtotal + margin_amount
     return furniture_row, lines, material_total, subtotal, margin_amount, grand_total
 
@@ -63,15 +63,15 @@ def budget_quote_data(conn: sqlite3.Connection, budget_id: int):
         abort(404)
     lines = conn.execute("SELECT * FROM budget_lines WHERE budget_id = ? ORDER BY id", (budget_id,)).fetchall()
     material_total = sum(line["total"] for line in lines)
-    subtotal = material_total + budget["labor_cost"]
-    margin_amount = material_total * (budget["margin_pct"] / 100)
+    subtotal = material_total
+    margin_amount = material_total
     grand_total = subtotal + margin_amount
     pseudo_furniture = {
         "id": budget["id"],
         "name": budget["title"],
         "description": budget["notes"] or budget["furniture_description"] or "",
-        "labor_cost": budget["labor_cost"],
-        "margin_pct": budget["margin_pct"],
+        "labor_cost": 0,
+        "margin_pct": 100,
     }
     return budget, pseudo_furniture, lines, material_total, subtotal, margin_amount, grand_total
 

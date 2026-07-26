@@ -174,9 +174,7 @@ def build_furniture_quote_pdf(
     pdf.line(total_x, pdf.y, 570, pdf.y, c["line"])
     totals = [
         ("Materiales", material_total),
-        ("Mano de obra", furniture["labor_cost"]),
-        ("Subtotal antes de margen", subtotal),
-        (f"Margen sobre material {furniture['margin_pct']}%", margin_amount),
+        ("Margen fijo 100%", margin_amount),
     ]
     for label, value in totals:
         pdf.y -= 22

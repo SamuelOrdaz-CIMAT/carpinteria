@@ -221,7 +221,7 @@ h2 { margin: 0 0 14px; font-size: 18px; }
 }
 
 .budget-form {
-  grid-template-columns: repeat(7, minmax(110px, 1fr)) auto;
+  grid-template-columns: repeat(5, minmax(120px, 1fr)) auto;
 }
 
 .budget-edit-form {

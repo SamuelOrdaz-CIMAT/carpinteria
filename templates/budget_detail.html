@@ -35,12 +35,6 @@
   <label>Cantidad
     <input name="furniture_qty" type="number" step="0.01" min="0" value="{{ budget.furniture_qty }}">
   </label>
-  <label>Mano de obra
-    <input name="labor_cost" type="number" step="0.01" min="0" value="{{ budget.labor_cost }}">
-  </label>
-  <label>Margen %
-    <input name="margin_pct" type="number" step="0.01" min="0" value="{{ budget.margin_pct }}">
-  </label>
   <label>Notas
     <input name="notes" value="{{ budget.notes }}">
   </label>
@@ -71,9 +65,7 @@
 
 <section class="totals">
   <div><span>Materiales</span><strong>{{ material_total|money }}</strong></div>
-  <div><span>Mano de obra</span><strong>{{ budget.labor_cost|money }}</strong></div>
-  <div><span>Subtotal antes de margen</span><strong>{{ subtotal|money }}</strong></div>
-  <div><span>Margen material {{ budget.margin_pct }}%</span><strong>{{ margin_amount|money }}</strong></div>
+  <div><span>Margen fijo 100%</span><strong>{{ margin_amount|money }}</strong></div>
   <div class="grand"><span>Total sugerido</span><strong>{{ grand_total|money }}</strong></div>
 </section>
 {% endblock %}

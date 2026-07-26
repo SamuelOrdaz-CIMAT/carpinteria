@@ -14,16 +14,14 @@ def register(app):
                 furniture_id = int(request.form["furniture_type_id"])
                 furniture_row = conn.execute("SELECT * FROM furniture_types WHERE id = ?", (furniture_id,)).fetchone()
                 qty = float(request.form.get("furniture_qty") or 1)
-                labor = float(request.form.get("labor_cost") or furniture_row["labor_cost"] or 0)
-                margin = float(request.form.get("margin_pct") or furniture_row["margin_pct"] or 30)
                 budget_id = create_budget_from_furniture(
                     conn,
                     furniture_id,
                     request.form.get("title", "").strip() or furniture_row["name"],
                     request.form.get("customer", "").strip(),
                     qty,
-                    labor,
-                    margin,
+                    0,
+                    100,
                     request.form.get("notes", "").strip(),
                 )
                 flash("Presupuesto creado.")
@@ -58,8 +56,8 @@ def register(app):
             settings_values = get_settings(conn)
             furniture_rows = conn.execute("SELECT * FROM furniture_types WHERE active = 1 ORDER BY name").fetchall()
         material_total = sum(line["total"] for line in lines)
-        subtotal = material_total + budget["labor_cost"]
-        margin_amount = material_total * (budget["margin_pct"] / 100)
+        subtotal = material_total
+        margin_amount = material_total
         grand_total = subtotal + margin_amount
         return render_template(
             "budget_detail.html",
@@ -85,8 +83,6 @@ def register(app):
             if not furniture_row:
                 abort(404)
             qty = float(request.form.get("furniture_qty") or 1)
-            labor = float(request.form.get("labor_cost") or furniture_row["labor_cost"] or 0)
-            margin = float(request.form.get("margin_pct") or furniture_row["margin_pct"] or 30)
             title = request.form.get("title", "").strip() or furniture_row["name"]
             conn.execute(
                 """
@@ -100,8 +96,8 @@ def register(app):
                     request.form.get("customer", "").strip(),
                     furniture_id,
                     qty,
-                    labor,
-                    margin,
+                    0,
+                    100,
                     request.form.get("notes", "").strip(),
                     budget_id,
                 ),
