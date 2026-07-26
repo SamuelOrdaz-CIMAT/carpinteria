@@ -420,6 +420,48 @@ label {
   min-width: 920px;
 }
 
+.quick-material-picker {
+  position: relative;
+  margin-bottom: 12px;
+}
+
+.quick-material-menu {
+  position: absolute;
+  z-index: 20;
+  top: calc(100% + 8px);
+  left: 0;
+  display: grid;
+  width: min(420px, 92vw);
+  max-height: 320px;
+  overflow: auto;
+  padding: 8px;
+  border: 1px solid var(--wood);
+  border-radius: 8px;
+  background: #fffaf2;
+  box-shadow: 0 16px 34px rgba(75, 40, 21, .18);
+}
+
+.quick-material-option {
+  padding: 10px 12px;
+  border: 0;
+  border-bottom: 1px solid #ead5b8;
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.quick-material-option:hover,
+.quick-material-option:focus-visible {
+  background: #f4e5ce;
+  outline: none;
+}
+
+.quick-material-option:last-child {
+  border-bottom: 0;
+}
+
 .button {
   display: inline-flex;
   align-items: center;

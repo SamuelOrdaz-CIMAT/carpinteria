@@ -80,6 +80,18 @@
     <button class="button" type="button" id="add-material-row">Agregar fila</button>
   </div>
   <form method="post">
+    <div class="quick-material-picker" data-open="false">
+      <button class="button quick-material-toggle" type="button" aria-expanded="false">Elegir materiales</button>
+      <div class="quick-material-menu" hidden>
+        {% for material in materials %}
+          <button
+            type="button"
+            class="quick-material-option"
+            data-material-id="{{ material.id }}"
+          >{{ material.name }} ({{ material.unit }})</button>
+        {% endfor %}
+      </div>
+    </div>
     <div class="table-scroll">
       <table class="bulk-material-table">
         <thead><tr><th>Material</th><th>Cantidad base</th><th>Comprar en</th><th>Notas</th><th>Quitar</th></tr></thead>
@@ -327,5 +339,42 @@
   document.getElementById("add-material-row")?.addEventListener("click", addBulkMaterialRow);
   document.getElementById("add-material-row-bottom")?.addEventListener("click", addBulkMaterialRow);
   ensureTrailingBulkRow();
+
+  const quickPicker = document.querySelector(".quick-material-picker");
+  const quickToggle = quickPicker?.querySelector(".quick-material-toggle");
+  const quickMenu = quickPicker?.querySelector(".quick-material-menu");
+
+  function setQuickPickerOpen(open) {
+    if (!quickPicker || !quickToggle || !quickMenu) return;
+    quickPicker.dataset.open = open ? "true" : "false";
+    quickToggle.setAttribute("aria-expanded", open ? "true" : "false");
+    quickMenu.hidden = !open;
+  }
+
+  function firstAvailableBulkRow() {
+    let row = bulkRows().find((candidate) => !rowHasMaterial(candidate));
+    if (!row) {
+      row = addBulkMaterialRow();
+    }
+    return row;
+  }
+
+  function addMaterialFromQuickPicker(materialId) {
+    const row = firstAvailableBulkRow();
+    const select = row?.querySelector(".material-picker");
+    if (!select) return;
+    select.value = materialId;
+    select.dispatchEvent(new Event("change", { bubbles: true }));
+    row.querySelector("[name='quantity']")?.focus();
+    setQuickPickerOpen(true);
+  }
+
+  quickToggle?.addEventListener("click", () => {
+    setQuickPickerOpen(quickPicker?.dataset.open !== "true");
+  });
+
+  quickPicker?.querySelectorAll(".quick-material-option").forEach((button) => {
+    button.addEventListener("click", () => addMaterialFromQuickPicker(button.dataset.materialId));
+  });
 </script>
 {% endblock %}
