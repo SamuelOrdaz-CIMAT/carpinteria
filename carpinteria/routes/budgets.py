@@ -125,6 +125,8 @@ def register(app):
         meta = {
             "title": budget["title"],
             "subtitle": budget["notes"] or budget["furniture_name"] or "",
+            "furniture_name": budget["furniture_name"] or budget["title"],
+            "quantity": f"{budget['furniture_qty']:.2f}".rstrip("0").rstrip("."),
             "folio": f"COT-{budget['id']:04d}",
             "customer": budget["customer"],
             "created_at": budget["created_at"].split(" ")[0],

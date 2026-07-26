@@ -139,6 +139,8 @@ def build_furniture_quote_pdf(
     meta = meta or {}
     title = meta.get("title") or furniture["name"]
     subtitle = meta.get("subtitle") or furniture["description"] or ""
+    furniture_name = meta.get("furniture_name") or furniture["name"]
+    quantity = meta.get("quantity")
     folio = meta.get("folio") or f"M-{furniture['id']:04d}"
     customer = meta.get("customer") or ""
     created_at = meta.get("created_at") or datetime.now().strftime("%Y-%m-%d")
@@ -165,28 +167,29 @@ def build_furniture_quote_pdf(
     if subtitle:
         pdf.text(42, desc_y, fit_text(subtitle, 96), 10, False, c["muted"])
 
-    pdf.y -= 88
-    draw_quote_table(pdf, lines, c)
-
-    pdf.ensure_space(170)
-    total_x = 350
-    pdf.y -= 8
-    pdf.line(total_x, pdf.y, 570, pdf.y, c["line"])
-    totals = [
-        ("Materiales", material_total),
-        ("Margen fijo 100%", margin_amount),
+    pdf.y -= 102
+    pdf.text(42, pdf.y, "Caracteristicas del mueble", 12, True, c["wood_dark"])
+    pdf.y -= 22
+    pdf.rect(42, pdf.y - 96, 528, 110, stroke=c["line"], fill=c["cream"])
+    feature_rows = [
+        ("Mueble", furniture_name),
+        ("Descripcion", subtitle or "Segun especificaciones acordadas"),
     ]
-    for label, value in totals:
-        pdf.y -= 22
-        pdf.text(total_x, pdf.y, label, 10, False, c["muted"])
-        pdf.right_text(560, pdf.y, money(value), 11, True, c["ink"])
+    if quantity is not None:
+        feature_rows.append(("Cantidad", quantity))
+    feature_rows.append(("Alcance", "Cotizacion final del mueble indicado"))
+    row_y = pdf.y - 8
+    for label, value in feature_rows:
+        pdf.text(58, row_y, label, 10, True, c["wood_dark"])
+        pdf.text(160, row_y, fit_text(value, 70), 10, False, c["ink"])
+        row_y -= 24
 
-    pdf.y -= 36
-    pdf.rect(total_x - 8, pdf.y - 12, 228, 36, stroke=c["wood_dark"], fill=c["walnut"])
-    pdf.text(total_x, pdf.y, "Total sugerido", 11, True, "#FFFFFF")
-    pdf.right_text(560, pdf.y, money(grand_total), 16, True, "#FFFFFF")
+    pdf.y -= 144
+    pdf.rect(342, pdf.y - 18, 228, 54, stroke=c["wood_dark"], fill=c["walnut"])
+    pdf.text(358, pdf.y + 12, "Total de la cotizacion", 11, True, "#FFFFFF")
+    pdf.right_text(552, pdf.y - 10, money(grand_total), 20, True, "#FFFFFF")
 
-    pdf.y -= 48
+    pdf.y -= 70
     pdf.text(42, pdf.y, "Notas", 10, True, c["wood_dark"])
     pdf.text(42, pdf.y - 18, fit_text(workshop.get("quote_validity"), 105), 9, False, c["muted"])
     pdf.text(42, pdf.y - 34, fit_text(workshop.get("payment_terms"), 105), 9, False, c["muted"])
