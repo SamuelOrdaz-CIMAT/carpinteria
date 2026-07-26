@@ -16,8 +16,8 @@ def register(app):
                     (
                         request.form.get("name", "").strip(),
                         request.form.get("description", "").strip(),
-                        float(request.form.get("labor_cost") or 0),
-                        float(request.form.get("margin_pct") or 30),
+                        0,
+                        100,
                     ),
                 )
                 flash("Tipo de mueble guardado.")
@@ -100,14 +100,12 @@ def register(app):
             conn.execute(
                 """
                 UPDATE furniture_types
-                SET name = ?, description = ?, labor_cost = ?, margin_pct = ?
+                SET name = ?, description = ?
                 WHERE id = ?
                 """,
                 (
                     request.form.get("name", "").strip(),
                     request.form.get("description", "").strip(),
-                    float(request.form.get("labor_cost") or 0),
-                    float(request.form.get("margin_pct") or 30),
                     furniture_id,
                 ),
             )
@@ -172,16 +170,14 @@ def register(app):
             if not furniture_row:
                 abort(404)
             qty = float(request.form.get("furniture_qty") or 1)
-            labor = float(request.form.get("labor_cost") or furniture_row["labor_cost"] or 0)
-            margin = float(request.form.get("margin_pct") or furniture_row["margin_pct"] or 30)
             budget_id = create_budget_from_furniture(
                 conn,
                 furniture_id,
                 request.form.get("title", "").strip(),
                 request.form.get("customer", "").strip(),
                 qty,
-                labor,
-                margin,
+                0,
+                100,
                 request.form.get("notes", "").strip(),
             )
         flash("Presupuesto creado desde el tipo de mueble.")
